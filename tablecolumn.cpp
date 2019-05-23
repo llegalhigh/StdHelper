@@ -1,11 +1,11 @@
 #include "tablecolumn.h"
 
-TableColumn::TableColumn(QDateTime st, QDateTime ed, ClassTable *parent)
-    :parentTablePtr(parent)
+TableColumn::TableColumn(ClassTable *parent)
+    :parentTablePtr(parent),
+      width(parentTablePtr->width / parentTablePtr->columnIndexList.length())
 {
+    //初始化列表
     childrenItemPtrList.clear();
-    setStart(st);
-    setEnd(ed);
 }
 
 TableColumn::~TableColumn()
@@ -23,4 +23,11 @@ void TableColumn::setEnd(QDateTime ed)
 {
     if(ed>start)
         end = ed;
+}
+
+void TableColumn::drawOnTable() const
+{
+    for (TableItem *childItemPtr : childrenItemPtrList) {
+        childItemPtr->drawOnTable(parentTablePtr->scenePtr);
+    }
 }

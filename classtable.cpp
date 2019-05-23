@@ -1,7 +1,11 @@
 #include "classtable.h"
 
 ClassTable::ClassTable(QMainWindow *pw, QGraphicsView *pv)
-    : firstDayOfWeek(Monday),windowPtr(pw),viewPtr(pv), scenePtr(new QGraphicsScene()), backgroundImageItemPtr(new QGraphicsPixmapItem()) {
+    : firstDayOfWeek(Monday),
+      windowPtr(pw),viewPtr(pv), scenePtr(new QGraphicsScene()), backgroundImageItemPtr(new QGraphicsPixmapItem()),
+      columnIndexList({1,2,3,4,5,6,7}),
+      width(viewPtr->width())
+{
     viewPtr->setGeometry(15,15,windowPtr->width()*4/5,windowPtr->height()*4/5);
     viewPtr->setAlignment(Qt::AlignLeft|Qt::AlignTop);
     //½«view°ó¶¨ÖÁscene
@@ -11,7 +15,7 @@ ClassTable::ClassTable(QMainWindow *pw, QGraphicsView *pv)
     scenePtr->addItem(backgroundImageItemPtr);
 }
 
-ClassTable::~ClassTable(){
+ClassTable::~ClassTable() {
     delete backgroundImageItemPtr;
     delete scenePtr;
 }

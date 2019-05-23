@@ -14,10 +14,15 @@ MainWindow::MainWindow(QWidget *parent)
     //设置显示中文
     QTextCodec::setCodecForLocale(QTextCodec::codecForLocale());
 
+    //菜单点击事件
     connect(ui->actionSettings, &QAction::triggered, this, &MainWindow::openSetting);
 
+    /*
+     * 以下这些将来都会由类ClassTable完成
+     */
+
     //初始化view
-    ui->graphicsView->setGeometry(15,15,static_cast<int>(static_cast<double>(this->width())*0.8),static_cast<int>(static_cast<double>(this->height())*0.8));
+    ui->graphicsView->setGeometry(0,0,this->width(),this->height());
     ui->graphicsView->setAlignment(Qt::AlignLeft|Qt::AlignTop);
 
     //创建并绑定scene
@@ -30,12 +35,13 @@ MainWindow::MainWindow(QWidget *parent)
     backgroundImageItemPtr->setPixmap(backgroundPixmap.scaled(ui->graphicsView->width(),ui->graphicsView->height()));
     scene->addItem(backgroundImageItemPtr);
 
+    //绘制边框和底色
     QPen *borderPenPtr=new QPen(QBrush(Qt::white),10);
     borderPenPtr->setJoinStyle(Qt::RoundJoin);
     scene->addRect(40,40,100,400, *borderPenPtr,QBrush(QColor(0,0,255,100)));
     //scene->addRect(10,10,399,399, QPen(Qt::black),QBrush(linearGradient));
 
-
+    //添加文字
     QGraphicsTextItem *textItemPtr=new QGraphicsTextItem();
     textItemPtr->setPlainText(QString::fromLocal8Bit("数学分析分析分析分析"));
     textItemPtr->setDefaultTextColor(Qt::white);

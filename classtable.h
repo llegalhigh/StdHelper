@@ -11,6 +11,8 @@
 
 class ClassTable
 {
+    friend TableColumn;
+
 public:
     //构造函数
     explicit ClassTable(QMainWindow*, QGraphicsView*);
@@ -23,7 +25,7 @@ public:
     void addItem(TableItem *);
     void draw() const;
 
-private:
+protected:
     enum dayOfWeek {
         Monday=1,
         Tuesday,
@@ -33,8 +35,10 @@ private:
         Saturday,
         Sunday
     };
+    //一周的起始日
     dayOfWeek firstDayOfWeek;
 
+    //各种指针
     QMainWindow *windowPtr;
     QGraphicsView *viewPtr;
     QGraphicsScene *scenePtr;
@@ -42,6 +46,11 @@ private:
     QGraphicsPixmapItem *backgroundImageItemPtr;
 
     QList<TableItem *> classItemPtrList;
+
+    //列TableColumn怎么排序（按照index）
+    QList<int> columnIndexList;
+    //表格的宽度
+    int width;
 };
 
 #endif // CLASSTABLE_H
