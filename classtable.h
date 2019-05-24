@@ -2,7 +2,6 @@
 #define CLASSTABLE_H
 
 #include "tableitem.h"
-
 #include <QGraphicsPixmapItem>
 #include <QGraphicsScene>
 #include <QGraphicsView>
@@ -10,20 +9,19 @@
 #include <QMainWindow>
 #include <QString>
 
-
 class ClassTable {
     friend TableColumn;
 
 public:
     //构造函数
-    explicit ClassTable( QMainWindow *, QGraphicsView * );
+    explicit ClassTable(QMainWindow *, QGraphicsView *);
     //析构函数
     ~ClassTable();
 
     //用于设置背景图片
-    void setBackgroundImage( const QString );
+    void setBackgroundImage(const QString);
 
-    void addItem( TableItem * );
+    void addItem(TableItem *);
     void draw() const;
 
 protected:
@@ -40,18 +38,18 @@ protected:
     dayOfWeek firstDayOfWeek;
 
     //各种指针
-    QMainWindow *   windowPtr;
-    QGraphicsView * viewPtr;
+    QMainWindow *windowPtr;
+    QGraphicsView *viewPtr;
     QGraphicsScene *scenePtr;
 
     QGraphicsPixmapItem *backgroundImageItemPtr;
 
-    QList< TableItem * > classItemPtrList;
+    QList<TableItem *> classItemPtrList;
 
     //列TableColumn怎么排序（按照index）
-    QList< int > columnIndexList;
-    //表格的宽度
-    int width;
+    QList<int> columnIndexList;
+    //表格的宽度、高度
+    int width, height;
 };
 
-#endif   // CLASSTABLE_H
+#endif // CLASSTABLE_H

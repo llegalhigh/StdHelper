@@ -2,6 +2,9 @@
 <ui version="4.0">
  <class>SettingWindow</class>
  <widget class="QMainWindow" name="SettingWindow">
+  <property name="enabled">
+   <bool>true</bool>
+  </property>
   <property name="geometry">
    <rect>
     <x>0</x>
@@ -10,11 +13,23 @@
     <height>600</height>
    </rect>
   </property>
+  <property name="font">
+   <font>
+    <family>微软雅黑</family>
+    <stylestrategy>PreferAntialias</stylestrategy>
+   </font>
+  </property>
+  <property name="cursor">
+   <cursorShape>ArrowCursor</cursorShape>
+  </property>
   <property name="windowTitle">
    <string>设置界面</string>
   </property>
+  <property name="documentMode">
+   <bool>true</bool>
+  </property>
   <widget class="QWidget" name="centralwidget">
-   <widget class="QGroupBox" name="groupBox">
+   <widget class="QGroupBox" name="termGroupBox">
     <property name="geometry">
      <rect>
       <x>10</x>
@@ -24,7 +39,7 @@
      </rect>
     </property>
     <property name="title">
-     <string>学期</string>
+     <string>This term</string>
     </property>
     <widget class="QWidget" name="verticalLayoutWidget">
      <property name="geometry">
@@ -41,12 +56,12 @@
         <item>
          <widget class="QLabel" name="label">
           <property name="text">
-           <string>开始于</string>
+           <string>begins on</string>
           </property>
          </widget>
         </item>
         <item>
-         <widget class="QDateEdit" name="dateEdit">
+         <widget class="QDateEdit" name="termStartDateEdit">
           <property name="dateTime">
            <datetime>
             <hour>0</hour>
@@ -66,23 +81,26 @@
         <item>
          <widget class="QLabel" name="label_2">
           <property name="text">
-           <string>共有</string>
+           <string>has</string>
           </property>
          </widget>
         </item>
         <item>
-         <widget class="QSpinBox" name="spinBox">
+         <widget class="QSpinBox" name="totalWeekBox">
           <property name="suffix">
-           <string>周</string>
+           <string> weeks</string>
           </property>
           <property name="prefix">
            <string/>
           </property>
           <property name="minimum">
-           <number>1</number>
+           <number>5</number>
           </property>
           <property name="maximum">
            <number>30</number>
+          </property>
+          <property name="value">
+           <number>20</number>
           </property>
          </widget>
         </item>
@@ -90,6 +108,39 @@
       </item>
      </layout>
     </widget>
+   </widget>
+   <widget class="QWidget" name="horizontalLayoutWidget">
+    <property name="geometry">
+     <rect>
+      <x>384</x>
+      <y>460</y>
+      <width>411</width>
+      <height>81</height>
+     </rect>
+    </property>
+    <layout class="QHBoxLayout" name="horizontalLayout_3">
+     <item>
+      <widget class="QPushButton" name="okButton">
+       <property name="text">
+        <string>OK</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QPushButton" name="applyButton">
+       <property name="text">
+        <string>Apply</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QPushButton" name="cancelButton">
+       <property name="text">
+        <string>Cancel</string>
+       </property>
+      </widget>
+     </item>
+    </layout>
    </widget>
   </widget>
   <widget class="QStatusBar" name="statusbar"/>

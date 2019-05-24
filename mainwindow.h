@@ -3,7 +3,6 @@
 
 #include <QMainWindow>
 
-
 namespace Ui {
 class MainWindow;
 }
@@ -12,17 +11,17 @@ class MainWindow : public QMainWindow {
     Q_OBJECT
 
 public:
-    explicit MainWindow( QWidget *parent = nullptr );
+    explicit MainWindow(QWidget *parent = nullptr);
     ~MainWindow();
 
     void showView();
 
 private slots:
-    //鎵撳紑璁剧疆绐楀彛SettingWindow鐨勬Ы
+    //打开设置窗口SettingWindow的槽
     void openSetting();
 
 private:
     Ui::MainWindow *ui;
 };
 
-#endif   // MAINWINDOW_H
+#endif // MAINWINDOW_H

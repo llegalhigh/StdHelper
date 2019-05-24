@@ -1,28 +1,28 @@
 #include "tablecolumn.h"
 
-
-TableColumn::TableColumn( ClassTable *parent )
-    : parentTablePtr( parent ),
-      width( parentTablePtr->width
-             / parentTablePtr->columnIndexList.length() ) {
+TableColumn::TableColumn(ClassTable *parent)
+    : parentTablePtr(parent),
+      width(parentTablePtr->width / parentTablePtr->columnIndexList.length()),
+      height(parentTablePtr->height) {
     //初始化列表
     childrenItemPtrList.clear();
 }
 
-TableColumn::~TableColumn() {}
+TableColumn::~TableColumn() {
+}
 
-void TableColumn::setStart( QDateTime st ) {
-    if ( st < end )
+void TableColumn::setStart(QDateTime st) {
+    if (st < end)
         start = st;
 }
 
-void TableColumn::setEnd( QDateTime ed ) {
-    if ( ed > start )
+void TableColumn::setEnd(QDateTime ed) {
+    if (ed > start)
         end = ed;
 }
 
 void TableColumn::drawOnTable() const {
-    for ( TableItem *childItemPtr : childrenItemPtrList ) {
-        childItemPtr->drawOnTable( parentTablePtr->scenePtr );
+    for (TableItem *childItemPtr : childrenItemPtrList) {
+        childItemPtr->drawOnTable(parentTablePtr->scenePtr);
     }
 }
