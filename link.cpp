@@ -33,8 +33,19 @@ void Link::addParameter( QString formalParam, QString actualParam ) {
     this->parameter += ( "&" + parameter );
 }
 
-void Link::bindSlot( const QObject *receiver, const char *member ) const {
+void Link::connect( const QObject *receiver, const char *member ) const {
     QObject::connect( manage, SIGNAL( finished( QNetworkReply * ) ), receiver,
+                      member );
+}
+
+void Link::disconnect() const
+{
+    manage->disconnect();
+}
+
+void Link::disconnect(const QObject *receiver, const char *member) const
+{
+    QObject::disconnect( manage, SIGNAL( finished( QNetworkReply * ) ), receiver,
                       member );
 }
 

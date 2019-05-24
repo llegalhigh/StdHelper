@@ -23,8 +23,12 @@ public:
     addParameter( QString formalParam,
                   QString actualParam );   //添加参数(前面是形参,后面是实参)
 
-    void bindSlot( const QObject *receiver,
-                   const char *member ) const;   //当得到回应信息时绑定槽函数
+    void connect( const QObject *receiver,
+                   const char *member ) const;   //绑定槽函数(网络请求完成时触发槽函数)
+
+    void disconnect() const;  //解除connect绑定
+    void disconnect( const QObject *receiver,
+                     const char *member ) const;  //解除connect绑定
 
     void post() const;   //利用POST方式发送请求
 
