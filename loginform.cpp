@@ -1,13 +1,13 @@
 #include "loginform.h"
 #include "ui_loginform.h"
+
 #include <QtGui>
 
-loginForm::loginForm(QWidget *parent) :
-    QDialog(parent),
-    ui(new Ui::loginForm)
-{
-    ui->setupUi(this);
-    setWindowFlags(Qt::FramelessWindowHint);
+
+loginForm::loginForm( QWidget *parent )
+    : QDialog( parent ), ui( new Ui::loginForm ) {
+    ui->setupUi( this );
+    setWindowFlags( Qt::FramelessWindowHint );
 
     /*
     setAutoFillBackground(true);
@@ -17,14 +17,12 @@ loginForm::loginForm(QWidget *parent) :
     */
 }
 
-loginForm::~loginForm()
-{
+loginForm::~loginForm() {
     delete ui;
 }
 
-void loginForm::on_pushButton_clicked()
-{
-    mainWindow=new MainWindow;
+void loginForm::on_pushButton_clicked() {
+    mainWindow = new MainWindow;
     mainWindow->show();
     this->close();
     return;

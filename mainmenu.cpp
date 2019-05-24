@@ -1,13 +1,10 @@
 #include "mainmenu.h"
 #include "settingwindow.h"
 
-MainMenu::MainMenu()
-{
 
-}
+MainMenu::MainMenu() {}
 
-void MainMenu::openSettingWindow()
-{
+void MainMenu::openSettingWindow() {
     SettingWindow sw;
     sw.show();
 }

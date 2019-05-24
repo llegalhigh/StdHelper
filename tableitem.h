@@ -3,21 +3,21 @@
 
 #include <QGraphicsItem>
 
+
 class TableColumn;
 
 class TableItem {
-
 public:
     //构造函数
-    explicit TableItem(const QString);
-    explicit TableItem(const char *);
+    explicit TableItem( const QString );
+    explicit TableItem( const char * );
     //析构函数
     ~TableItem();
 
     //绘制
-    void drawOnTable(QGraphicsScene *) const;
+    void drawOnTable( QGraphicsScene * ) const;
 
-    void setText(const QString);
+    void    setText( const QString );
     QString getText() const;
 
 private:
@@ -25,4 +25,4 @@ private:
     QString text;
 };
 
-#endif // TABLEITEM_H
+#endif   // TABLEITEM_H

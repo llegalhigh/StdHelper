@@ -1,110 +1,98 @@
 #include "mytcpsever.h"
 
-MyTcpSever::MyTcpSever()
-{
-    tcpServer = new QTcpServer(this);
-    ui->edtIP->setText(QNetworkInterface().allAddresses().at(1).toString());   //è·å–æœ¬åœ°IP
-    ui->btnConnect->setEnabled(true);
-    ui->btnSend->setEnabled(false);
 
-    connect(tcpServer, SIGNAL(newConnection()), this, SLOT(NewConnectionSlot()));
-    bool ok = tcpServer->listen(QHostAddress::Any, ui->edtPort->text().toInt());
-    if(ok)
-    {
-        ui->btnConnect->setText("æ–­å¼€");
-        ui->btnSend->setEnabled(true);
+MyTcpSever::MyTcpSever() {
+    tcpServer = new QTcpServer( this );
+    ui->edtIP->setText(
+        QNetworkInterface().allAddresses().at( 1 ).toString() );   //»ñÈ¡±¾µØIP
+    ui->btnConnect->setEnabled( true );
+    ui->btnSend->setEnabled( false );
+
+    connect( tcpServer, SIGNAL( newConnection() ), this,
+             SLOT( NewConnectionSlot() ) );
+    bool ok =
+        tcpServer->listen( QHostAddress::Any, ui->edtPort->text().toInt() );
+    if ( ok ) {
+        ui->btnConnect->setText( "¶Ï¿ª" );
+        ui->btnSend->setEnabled( true );
     }
 }
-void MyTcpServer::NewConnectionSlot()
-{
+void MyTcpServer::NewConnectionSlot() {
     currentClient = tcpServer->nextPendingConnection();
-    tcpClient.append(currentClient);
-    ui->cbxConnection->addItem(tr("%1:%2").arg(currentClient->peerAddress().toString().split("::ffff:")[1])\
-                                          .arg(currentClient->peerPort()));
-    connect(currentClient, SIGNAL(readyRead()), this, SLOT(ReadData()));
-    connect(currentClient, SIGNAL(disconnected()), this, SLOT(disconnectedSlot()));
+    tcpClient.append( currentClient );
+    ui->cbxConnection->addItem(
+        tr( "%1:%2" )
+            .arg(
+                currentClient->peerAddress().toString().split( "::ffff:" )[1] )
+            .arg( currentClient->peerPort() ) );
+    connect( currentClient, SIGNAL( readyRead() ), this, SLOT( ReadData() ) );
+    connect( currentClient, SIGNAL( disconnected() ), this,
+             SLOT( disconnectedSlot() ) );
 }
 
-void MyTcpServer:: disconnectedSlot()
-{
-    for(int i=0; i<tcpClient.length(); i++)
-    {
-        for(int i=0; i<tcpClient.length(); i++)//æ–­å¼€æ‰€æœ‰è¿æ¥
+void MyTcpServer::disconnectedSlot() {
+    for ( int i = 0; i < tcpClient.length(); i++ ) {
+        for ( int i = 0; i < tcpClient.length(); i++ )   //¶Ï¿ªËùÓĞÁ¬½Ó
         {
             tcpClient[i]->disconnectFromHost();
-            bool ok = tcpClient[i]->waitForDisconnected(1000);
-            if(!ok)
-            {
-                // å¤„ç†å¼‚å¸¸
+            bool ok = tcpClient[i]->waitForDisconnected( 1000 );
+            if ( !ok ) {
+                // ´¦ÀíÒì³£
             }
-            tcpClient.removeAt(i);  //ä»ä¿å­˜çš„å®¢æˆ·ç«¯åˆ—è¡¨ä¸­å–å»é™¤
+            tcpClient.removeAt( i );   //´Ó±£´æµÄ¿Í»§¶ËÁĞ±íÖĞÈ¡È¥³ı
         }
-        tcpServer->close();     //ä¸å†ç›‘å¬ç«¯å£
-        if(tcpClient[i]->state() == QAbstractSocket::UnconnectedState)
-        {
-            // åˆ é™¤å­˜å‚¨åœ¨comboxä¸­çš„å®¢æˆ·ç«¯ä¿¡æ¯
-            ui->cbxConnection->removeItem(ui->cbxConnection->findText(tr("%1:%2")\
-                                  .arg(tcpClient[i]->peerAddress().toString().split("::ffff:")[1])\
-                                  .arg(tcpClient[i]->peerPort())));
-            // åˆ é™¤å­˜å‚¨åœ¨tcpClientåˆ—è¡¨ä¸­çš„å®¢æˆ·ç«¯ä¿¡æ¯
-             tcpClient[i]->destroyed();
-             tcpClient.removeAt(i);
+        tcpServer->close();   //²»ÔÙ¼àÌı¶Ë¿Ú
+        if ( tcpClient[i]->state() == QAbstractSocket::UnconnectedState ) {
+            // É¾³ı´æ´¢ÔÚcomboxÖĞµÄ¿Í»§¶ËĞÅÏ¢
+            ui->cbxConnection->removeItem( ui->cbxConnection->findText(
+                tr( "%1:%2" )
+                    .arg( tcpClient[i]->peerAddress().toString().split(
+                        "::ffff:" )[1] )
+                    .arg( tcpClient[i]->peerPort() ) ) );
+            // É¾³ı´æ´¢ÔÚtcpClientÁĞ±íÖĞµÄ¿Í»§¶ËĞÅÏ¢
+            tcpClient[i]->destroyed();
+            tcpClient.removeAt( i );
         }
     }
 }
-void MyTcpServer::ReadData()
-{
-    // ç”±äºreadyReadä¿¡å·å¹¶æœªæä¾›SocketDecriptorï¼Œæ‰€ä»¥éœ€è¦éå†æ‰€æœ‰å®¢æˆ·ç«¯
-    for(int i=0; i<tcpClient.length(); i++)
-    {
+void MyTcpServer::ReadData() {
+    // ÓÉÓÚreadyReadĞÅºÅ²¢Î´Ìá¹©SocketDecriptor£¬ËùÒÔĞèÒª±éÀúËùÓĞ¿Í»§¶Ë
+    for ( int i = 0; i < tcpClient.length(); i++ ) {
         QByteArray buffer = tcpClient[i]->readAll();
-        if(buffer.isEmpty())    continue;
+        if ( buffer.isEmpty() )
+            continue;
 
         static QString IP_Port, IP_Port_Pre;
-        IP_Port = tr("[%1:%2]:").arg(tcpClient[i]->peerAddress().toString().split("::ffff:")[1])\
-                                     .arg(tcpClient[i]->peerPort());
+        IP_Port = tr( "[%1:%2]:" )
+                      .arg( tcpClient[i]->peerAddress().toString().split(
+                          "::ffff:" )[1] )
+                      .arg( tcpClient[i]->peerPort() );
 
-        // è‹¥æ­¤æ¬¡æ¶ˆæ¯çš„åœ°å€ä¸ä¸Šæ¬¡ä¸åŒï¼Œåˆ™éœ€æ˜¾ç¤ºæ­¤æ¬¡æ¶ˆæ¯çš„å®¢æˆ·ç«¯åœ°å€
-        if(IP_Port != IP_Port_Pre)
-            ui->edtRecv->append(IP_Port);
+        // Èô´Ë´ÎÏûÏ¢µÄµØÖ·ÓëÉÏ´Î²»Í¬£¬ÔòĞèÏÔÊ¾´Ë´ÎÏûÏ¢µÄ¿Í»§¶ËµØÖ·
+        if ( IP_Port != IP_Port_Pre )
+            ui->edtRecv->append( IP_Port );
 
-        ui->edtRecv->append(buffer);
+        ui->edtRecv->append( buffer );
 
-        //æ›´æ–°ip_port
+        //¸üĞÂip_port
         IP_Port_Pre = IP_Port;
     }
 }
 
-
-void MyTcpServer:: on_btnSend_clicked()
-{
-    if(ui->cbxConnection->currentIndex() == 0)
-    {
-        for(int i=0; i<tcpClient.length(); i++)
-            tcpClient[i]->write(data.toLatin1()); //qt5é™¤å»äº†.toAscii()
+void MyTcpServer::on_btnSend_clicked() {
+    if ( ui->cbxConnection->currentIndex() == 0 ) {
+        for ( int i = 0; i < tcpClient.length(); i++ )
+            tcpClient[i]->write( data.toLatin1() );   // qt5³ıÈ¥ÁË.toAscii()
     }
-    //æŒ‡å®šè¿æ¥
-    QString clientIP = ui->cbxConnection->currentText().split(":")[0];
-    int clientPort = ui->cbxConnection->currentText().split(":")[1].toInt();
-    for(int i=0; i<tcpClient.length(); i++)
-    {
-        if(tcpClient[i]->peerAddress().toString().split("::ffff:")[1]==clientIP\
-                        && tcpClient[i]->peerPort()==clientPort)
-        {
-            tcpClient[i]->write(data.toLatin1());
-            return; //ip:portå”¯ä¸€ï¼Œæ— éœ€ç»§ç»­æ£€ç´¢
+    //Ö¸¶¨Á¬½Ó
+    QString clientIP = ui->cbxConnection->currentText().split( ":" )[0];
+    int clientPort   = ui->cbxConnection->currentText().split( ":" )[1].toInt();
+    for ( int i = 0; i < tcpClient.length(); i++ ) {
+        if ( tcpClient[i]->peerAddress().toString().split( "::ffff:" )[1]
+                 == clientIP
+             && tcpClient[i]->peerPort() == clientPort ) {
+            tcpClient[i]->write( data.toLatin1() );
+            return;   // ip:portÎ¨Ò»£¬ÎŞĞè¼ÌĞø¼ìË÷
         }
     }
 }
-
-
-
-
-
-
-
-
-
-
-
-

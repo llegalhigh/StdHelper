@@ -1,32 +1,40 @@
 #ifndef LINK_H
 #define LINK_H
 
-#include <QString>
 #include <QNetworkAccessManager>
 #include <QNetworkReply>
+#include <QString>
 
-class Link : public QObject
-{
+
+class Link : public QObject {
     Q_OBJECT
+
 public:
-    explicit Link(QString Url = "", QString parameter = "");
+    explicit Link( QString Url = "", QString parameter = "" );
     ~Link();
 
-    void setUrl(QString Url);
-    void setParameter(QString formalParam, QString actualParam);//è®¾ç½®å‚æ•°(å‰é¢æ˜¯å½¢å‚,åé¢æ˜¯å®å‚)
+    void setUrl( QString Url );
+    void
+            setParameter( QString formalParam,
+                          QString actualParam );   //ÉèÖÃ²ÎÊı(Ç°ÃæÊÇĞÎ²Î,ºóÃæÊÇÊµ²Î)
     QString getUrl() const;
     QString getParameter() const;
-    void addParameter(QString formalParam, QString actualParam);//æ·»åŠ å‚æ•°(å‰é¢æ˜¯å½¢å‚,åé¢æ˜¯å®å‚)
+    void
+    addParameter( QString formalParam,
+                  QString actualParam );   //Ìí¼Ó²ÎÊı(Ç°ÃæÊÇĞÎ²Î,ºóÃæÊÇÊµ²Î)
 
-    void bindSlot(const QObject *receiver, const char *member) const;//å½“å¾—åˆ°å›åº”ä¿¡æ¯æ—¶ç»‘å®šæ§½å‡½æ•°
+    void bindSlot( const QObject *receiver,
+                   const char *member ) const;   //µ±µÃµ½»ØÓ¦ĞÅÏ¢Ê±°ó¶¨²Ûº¯Êı
 
-    void post() const;//åˆ©ç”¨POSTæ–¹å¼å‘é€è¯·æ±‚
+    void post() const;   //ÀûÓÃPOST·½Ê½·¢ËÍÇëÇó
 
-    static QString getReply(QNetworkReply*);//è·å–å›åº”ä¿¡æ¯(QString),è¿™æ˜¯staticå‡½æ•°,å¯ä»¥ä¸åˆ›å»ºå¯¹è±¡ç›´æ¥ç”¨
+    static QString getReply(
+        QNetworkReply
+            * );   //»ñÈ¡»ØÓ¦ĞÅÏ¢(QString),ÕâÊÇstaticº¯Êı,¿ÉÒÔ²»´´½¨¶ÔÏóÖ±½ÓÓÃ
 private:
-    QString Url;//ç½‘ç»œipåœ°å€
-    QString parameter;//å‘é€çš„å‚æ•°
+    QString                Url;         //ÍøÂçipµØÖ·
+    QString                parameter;   //·¢ËÍµÄ²ÎÊı
     QNetworkAccessManager *manage;
 };
 
-#endif // LINK_H
+#endif   // LINK_H

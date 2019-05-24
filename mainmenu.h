@@ -3,8 +3,8 @@
 
 #include "ui_mainwindow.h"
 
-class MainMenu : public Ui_MainWindow
-{
+
+class MainMenu : public Ui_MainWindow {
     Q_OBJECT
 
 public:
@@ -14,4 +14,4 @@ public slots:
     void openSettingWindow();
 };
 
-#endif // MAINMENU_H
+#endif   // MAINMENU_H
