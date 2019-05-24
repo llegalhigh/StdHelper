@@ -39,7 +39,7 @@ QString Link::getParameter() const
 void Link::addParameter(QString formalParam, QString actualParam)
 {
     QString parameter = (formalParam + "=" + actualParam);
-    this->parameter += "&"+parameter;
+    this->parameter += ("&"+parameter);
 }
 
 void Link::bindSlot(const QObject *receiver, const char *member) const
