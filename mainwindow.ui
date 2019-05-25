@@ -51,7 +51,7 @@
    </property>
    <widget class="QMenu" name="menuMore">
     <property name="title">
-     <string>更多</string>
+     <string>?</string>
     </property>
     <addaction name="actionSettings"/>
     <addaction name="separator"/>
@@ -61,12 +61,12 @@
   </widget>
   <action name="actionSettings">
    <property name="text">
-    <string>设置</string>
+    <string>&amp;Settings</string>
    </property>
   </action>
   <action name="actionQuit">
    <property name="text">
-    <string>退出</string>
+    <string>&amp;Quit</string>
    </property>
   </action>
  </widget>

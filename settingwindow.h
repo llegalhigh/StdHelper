@@ -1,11 +1,15 @@
 #ifndef SETTINGWINDOW_H
 #define SETTINGWINDOW_H
 
+#include "mainwindow.h"
+
 #include <QMainWindow>
+
 //文件处理
 #include <QBitArray>
 #include <QDataStream>
 #include <QFile>
+
 
 namespace Ui {
 class SettingWindow;
@@ -14,8 +18,10 @@ class SettingWindow;
 class SettingWindow : public QMainWindow {
     Q_OBJECT
 
+    friend class MainWindow;
+
 public:
-    explicit SettingWindow(QWidget *parent = nullptr);
+    explicit SettingWindow( MainWindow *parentMain, QWidget *parent = nullptr );
     ~SettingWindow();
 
 private slots:
@@ -27,13 +33,20 @@ private slots:
 
 private:
     Ui::SettingWindow *ui;
+    MainWindow *       mainWindowPtr;
 
-    static void rewriteSettingFile(QFile &);
-    static void writeSettingItem(qint64, QVariant, QDataStream &);
-    static QVariant readSettingItem(qint64, QDataStream &);
+    static constexpr qint64 MAX_SETTING_INDEX = 1;   // index目前最大值
 
-    void updateWindow(QDataStream &stream);
-    void updateWindow();
+    static void     rewriteSettingFile( QFile & );
+    static void     writeSettingItem( const qint64, QVariant, QDataStream & );
+    static QVariant readSettingItem( const qint64, QDataStream & );
+
+    static QVariant passOne( const qint64, QDataStream &, MainWindow * );
+    void            updateOne( const qint64, QDataStream & );
+    void            updateWindow( QDataStream & );
+    void            updateWindow();
+
+    static void passAll( MainWindow * );
 };
 
-#endif // SETTINGWINDOW_H
+#endif   // SETTINGWINDOW_H

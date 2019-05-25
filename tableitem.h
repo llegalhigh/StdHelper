@@ -6,7 +6,7 @@
 
 class TableColumn;
 
-class TableItem {
+class TableItem /*: public QGraphicsItem*/ {
 public:
     //¹¹Ôìº¯Êý
     explicit TableItem( const QString );

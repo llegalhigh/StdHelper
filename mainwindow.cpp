@@ -11,6 +11,7 @@
 MainWindow::MainWindow( QWidget *parent )
     : QMainWindow( parent ), ui( new Ui::MainWindow ) {
     ui->setupUi( this );
+    childTablePtr = new ClassTable( this, ui->graphicsView );
     //设置显示中文
     QTextCodec::setCodecForLocale( QTextCodec::codecForLocale() );
 
@@ -18,7 +19,12 @@ MainWindow::MainWindow( QWidget *parent )
     connect( ui->actionSettings, &QAction::triggered, this,
              &MainWindow::openSetting );
 
-    /*
+    //从dat读取所有设置项
+    SettingWindow::passAll( this );
+    this->setWindowTitle(
+        tr( "Std-Helper - Week %1" ).arg( childTablePtr->whichWeek() ) );
+
+    /**
      * 以下这些将来都会由类ClassTable完成
      */
 
@@ -59,6 +65,6 @@ MainWindow::~MainWindow() {
 }
 
 void MainWindow::openSetting() {
-    SettingWindow *sw = new SettingWindow;
+    SettingWindow *sw = new SettingWindow( this );
     sw->show();
 }
