@@ -4,8 +4,7 @@
 #
 #-------------------------------------------------
 
-QT       += core gui \
-            network
+QT       += core gui
 
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
@@ -27,25 +26,19 @@ CONFIG += c++11
 
 SOURCES += \
         classtable.cpp \
-        link.cpp \
         loginform.cpp \
         main.cpp \
-        mainmenu.cpp \
         mainwindow.cpp \
-        mytcpclient.cpp \
-        mytcpsever.cpp \
+        qgraphicstableitem.cpp \
         settingwindow.cpp \
         tablecolumn.cpp \
         tableitem.cpp
 
 HEADERS += \
         classtable.h \
-        link.h \
         loginform.h \
-        mainmenu.h \
         mainwindow.h \
-        mytcpclient.h \
-        mytcpsever.h \
+        qgraphicstableitem.h \
         settingwindow.h \
         tablecolumn.h \
         tableitem.h
@@ -59,7 +52,3 @@ FORMS += \
 qnx: target.path = /tmp/$${TARGET}/bin
 else: unix:!android: target.path = /opt/$${TARGET}/bin
 !isEmpty(target.path): INSTALLS += target
-
-DISTFILES += \
-    Images/loginBackground.jpg \
-    loginBackground.jpg

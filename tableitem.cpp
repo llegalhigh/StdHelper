@@ -1,39 +1,89 @@
+#include "classtable.h"
+#include "tablecolumn.h"
 #include "tableitem.h"
 
 #include <QGraphicsScene>
 #include <QGraphicsTextItem>
 
 
-TableItem::TableItem( const QString itemText ) {
+TableItem::TableItem( const QString itemText, const QDateTime st,
+                      const QDateTime ed, ClassTable *parentPtr )
+    : parentTablePtr( parentPtr ), start( st ), end( ed ) {
     setText( itemText );
+    findParentColumns();   //寻找上级TableColumn
 }
 
-TableItem::TableItem( const char *string ) {
-    setText( QString::fromLocal8Bit( string ) );
+TableItem::~TableItem() {
+    for ( QGraphicsItem *itemPtr : childQGraphicsItemPtrList ) {
+        delete itemPtr;
+    }
 }
 
 void TableItem::drawOnTable( QGraphicsScene *scene ) const {
-    // 设置边框和底色
-    QPen *borderPenPtr = new QPen( QBrush( Qt::white ), 10 );
-    borderPenPtr->setJoinStyle( Qt::RoundJoin );
-
-    // 设置文字
-    QGraphicsTextItem *textItemPtr = new QGraphicsTextItem();
-    textItemPtr->setPlainText( this->text );
-    textItemPtr->setDefaultTextColor( Qt::white );
-    textItemPtr->setPos( 60, 60 );
-    textItemPtr->setTextWidth( 90 );
-    QFont textFont;
-    textFont.setBold( true );
-    textFont.setPointSize( 15 );
-    textItemPtr->setFont( textFont );
-
-    // 绘制到scene中
-    scene->addRect( 50, 50, 100, 400, *borderPenPtr,
-                    QBrush( QColor( 0, 0, 255, 100 ) ) );
-    scene->addItem( textItemPtr );
+    for ( QGraphicsItem *itemPtr : childQGraphicsItemPtrList ) {
+        parentTablePtr->scenePtr->addItem( itemPtr );
+    }
 }
 
 void TableItem::setText( const QString text ) {
     this->text = text;
+    for ( QGraphicsTableItem *itemPtr : childQGraphicsItemPtrList ) {
+        itemPtr->textItemPtr->setPlainText( text );
+    }
+}
+
+/**
+ * @brief   在上级ClassTable中寻找归属的TableColumn
+ * @warning
+ * @todo
+ */
+void TableItem::findParentColumns() {
+    parentColumnPtrList.clear();
+    for ( TableColumn *colPtr : parentTablePtr->columnList ) {
+        QDateTime colStartTime = colPtr->start;
+        QDateTime colEndTime   = colPtr->end;
+        if ( haveIntersection( start, end, colStartTime, colEndTime ) ) {
+            this->parentColumnPtrList.append( colPtr );
+            colPtr->childrenItemPtrList.append( this );
+
+            QDateTime startTime = qMax( colStartTime, this->start );
+            QDateTime endTime   = qMin( colEndTime, this->end );
+
+            // 设置边框
+            QPen borderPen = QPen( QBrush( Qt::white ), this->borderWidth );
+            borderPen.setJoinStyle( Qt::RoundJoin );
+            int xPos = colPtr->getXPos()
+                       + (int)( borderWidth / 2 );   //边框左上顶点X,Y坐标
+            int yPos =
+                colPtr->getYPos() + colPtr->itemYPosShouldBe( startTime );
+            int rectWidth = colPtr->visibleWidth - (int)borderWidth;
+            int rectHeight =
+                colPtr->itemYPosShouldBe( endTime ) - yPos - (int)borderWidth;
+            // 设置底色
+            QBrush fillBrush = QBrush( QColor( 0, 0, 255, 100 ) );
+
+            // 设置文字字体
+            QFont textFont;
+            textFont.setBold( true );
+            textFont.setPointSize( 10 );
+
+            QGraphicsTableItem *childItemPtr = new QGraphicsTableItem(
+                colPtr, xPos, yPos, rectWidth, rectHeight, borderPen, fillBrush,
+                text );
+            this->childQGraphicsItemPtrList.append( childItemPtr );
+        }
+    }
+}
+
+/**
+ * @brief   判断两个区间[start1,end1]和[start2,end2]是否有交集
+ * @warning 前提：1.类型T必须支持==,<,<=,>=等operator
+ *               2.区间合法，start1<end1，start2<end2
+ * @note    static
+ */
+template< typename T >
+bool TableItem::haveIntersection( T &start1, T &end1, T &start2, T &end2 ) {
+    return start1 == start2 || end1 == start2 || end1 == end2
+           || ( start1 >= start2 && start1 < end2 )
+           || ( start1 <= start2 && ( end1 >= start2 || end1 >= end2 ) );
 }
