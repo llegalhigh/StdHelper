@@ -7,6 +7,7 @@
 #include <QGraphicsView>
 #include <QTextCodec>
 
+
 MainWindow::MainWindow( QWidget *parent )
     : QMainWindow( parent ), ui( new Ui::MainWindow ) {
     ui->setupUi( this );
@@ -82,10 +83,7 @@ int MainWindow::getMainHeight() const {
 }
 
 void MainWindow::resizeEvent( QResizeEvent *event ) {
-    childTablePtr->width  = width();
-    childTablePtr->height = getMainHeight();
-    childTablePtr->setBackgroundImage( "D:/1.jpg" );
-    childTablePtr->viewPtr->repaint();
+    childTablePtr->resize();
 }
 
 void MainWindow::openSetting() {

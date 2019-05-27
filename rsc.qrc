@@ -1,0 +1,5 @@
+<RCC>
+    <qresource prefix="/image">
+        <file alias="tableBackgroundImage">D:/1.jpg</file>
+    </qresource>
+</RCC>

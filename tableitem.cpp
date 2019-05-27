@@ -5,7 +5,6 @@
 #include <QGraphicsScene>
 #include <QGraphicsTextItem>
 
-
 TableItem::TableItem( const QString itemText, const QDateTime st,
                       const QDateTime ed, ClassTable *parentPtr )
     : parentTablePtr( parentPtr ), start( st ), end( ed ) {
@@ -22,6 +21,12 @@ TableItem::~TableItem() {
 void TableItem::drawOnTable( QGraphicsScene *scene ) const {
     for ( QGraphicsItem *itemPtr : childQGraphicsItemPtrList ) {
         parentTablePtr->scenePtr->addItem( itemPtr );
+    }
+}
+
+void TableItem::resize( QResizeEvent *tableEvent ) {
+    for ( QGraphicsTableItem *childItemPtr : childQGraphicsItemPtrList ) {
+        childItemPtr->resize( tableEvent );
     }
 }
 
@@ -68,9 +73,10 @@ void TableItem::findParentColumns() {
             textFont.setPointSize( 10 );
 
             QGraphicsTableItem *childItemPtr = new QGraphicsTableItem(
-                colPtr, xPos, yPos, rectWidth, rectHeight, borderPen, fillBrush,
-                text );
+                colPtr, this, xPos, yPos, rectWidth, rectHeight, borderPen,
+                fillBrush, text );
             this->childQGraphicsItemPtrList.append( childItemPtr );
+            colPtr->childQGraphicsItemPtrList.append( childItemPtr );
         }
     }
 }

@@ -26,14 +26,18 @@ public:
     ~ClassTable();
 
     //用于设置背景图片
-    void setBackgroundImage( const QString );
+    void setBackgroundImage( const QString filePath );
 
     int getColumnNo() const;
 
     void addItem( TableItem * );
     void draw() const;
 
-    void resizeEvent();
+    void           resize();
+    static QSize   scaleSize( QSize smallOld, QResizeEvent *event );
+    static QRectF  scaleSize( QRectF smallOld, QResizeEvent *event );
+    static QLineF  scaleSize( QLineF smallOld, QResizeEvent *event );
+    static QPointF scaleSize( QPointF smallOld, QResizeEvent *event );
 
 protected:
     enum dayOfWeek {
@@ -56,6 +60,7 @@ protected:
 
     //背景图片的指针
     QGraphicsPixmapItem *backgroundImageItemPtr;
+    QString              backgroundImageFilePath;
 
     //下级的TableColumn指针们
     QList< TableColumn * > columnList;
@@ -67,7 +72,7 @@ protected:
 
     //表格的宽度、高度
     int width, height;
-    // TableItem的宽度
+    // TableItem的边框粗细
     int borderWidth = 10;
 
     QDate  termStartDate;

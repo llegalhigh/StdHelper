@@ -7,7 +7,6 @@
 #include <QGraphicsItem>
 #include <QList>
 
-
 class ClassTable;
 class TableColumn;
 
@@ -20,10 +19,14 @@ public:
 
     //»æÖÆ
     void drawOnTable( QGraphicsScene * ) const;
+    void resize( QResizeEvent *tableEvent );
 
-    void    setText( const QString );
+    // setter
+    void setText( const QString );
+    // getter
     QString getText() const;
 
+    //¸¨Öúº¯Êý
     template< typename T >
     static bool haveIntersection( T &start1, T &end1, T &start2, T &end2 );
 
