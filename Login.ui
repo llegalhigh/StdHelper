@@ -19,7 +19,10 @@
    </font>
   </property>
   <property name="windowTitle">
-   <string>Widget</string>
+   <string/>
+  </property>
+  <property name="windowOpacity">
+   <double>1.000000000000000</double>
   </property>
   <property name="styleSheet">
    <string notr="true">#Login{border-image: url(:/image/loginBackground);}</string>
@@ -159,10 +162,21 @@
         </widget>
        </item>
        <item row="3" column="2">
-        <widget class="QLineEdit" name="lineEdit_password"/>
+        <widget class="QLineEdit" name="lineEdit_password">
+         <property name="text">
+          <string/>
+         </property>
+         <property name="echoMode">
+          <enum>QLineEdit::Password</enum>
+         </property>
+        </widget>
        </item>
        <item row="5" column="2">
-        <widget class="QLineEdit" name="lineEdit_confirmpwd"/>
+        <widget class="QLineEdit" name="lineEdit_confirmpwd">
+         <property name="echoMode">
+          <enum>QLineEdit::Password</enum>
+         </property>
+        </widget>
        </item>
        <item row="0" column="2">
         <widget class="QLineEdit" name="lineEdit_username"/>
