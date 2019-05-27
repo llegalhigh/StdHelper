@@ -14,31 +14,33 @@
    <string>StdHelper</string>
   </property>
   <widget class="QWidget" name="centralWidget">
-   <widget class="QGraphicsView" name="graphicsView">
-    <property name="geometry">
-     <rect>
-      <x>90</x>
-      <y>30</y>
-      <width>621</width>
-      <height>451</height>
-     </rect>
-    </property>
-    <property name="minimumSize">
-     <size>
-      <width>621</width>
-      <height>451</height>
-     </size>
-    </property>
-    <property name="foregroundBrush">
-     <brush brushstyle="NoBrush">
-      <color alpha="255">
-       <red>0</red>
-       <green>0</green>
-       <blue>0</blue>
-      </color>
-     </brush>
-    </property>
-   </widget>
+   <layout class="QHBoxLayout" name="horizontalLayout">
+    <item>
+     <widget class="QGraphicsView" name="graphicsView">
+      <property name="sizePolicy">
+       <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+        <horstretch>0</horstretch>
+        <verstretch>0</verstretch>
+       </sizepolicy>
+      </property>
+      <property name="minimumSize">
+       <size>
+        <width>621</width>
+        <height>451</height>
+       </size>
+      </property>
+      <property name="foregroundBrush">
+       <brush brushstyle="NoBrush">
+        <color alpha="255">
+         <red>0</red>
+         <green>0</green>
+         <blue>0</blue>
+        </color>
+       </brush>
+      </property>
+     </widget>
+    </item>
+   </layout>
   </widget>
   <widget class="QMenuBar" name="menuBar">
    <property name="geometry">
@@ -51,7 +53,7 @@
    </property>
    <widget class="QMenu" name="menuMore">
     <property name="title">
-     <string>更多</string>
+     <string>?</string>
     </property>
     <addaction name="actionSettings"/>
     <addaction name="separator"/>
@@ -61,12 +63,12 @@
   </widget>
   <action name="actionSettings">
    <property name="text">
-    <string>设置</string>
+    <string>&amp;Settings</string>
    </property>
   </action>
   <action name="actionQuit">
    <property name="text">
-    <string>退出</string>
+    <string>&amp;Quit</string>
    </property>
   </action>
  </widget>
