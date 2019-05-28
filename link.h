@@ -4,6 +4,9 @@
 #include <QNetworkAccessManager>
 #include <QNetworkReply>
 #include <QString>
+#include <QByteArray>
+#include <QJsonDocument>
+#include <QJsonObject>
 
 
 class Link : public QObject {
@@ -32,9 +35,10 @@ public:
 
     void post() const;   //利用POST方式发送请求
 
-    static QString getReply(
+    static QByteArray getReply(
         QNetworkReply
-            * );   //获取回应信息(QString),这是static函数,可以不创建对象直接用
+            * );   //获取回应信息(QByteArray),这是static函数,可以不创建对象直接用
+    static QJsonObject jsonDecode(const QByteArray &);  //解析Json对象,并返回一个QJsonObject对象
 private:
     QString                Url;         //网络ip地址
     QString                parameter;   //发送的参数

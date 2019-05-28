@@ -3,6 +3,9 @@
 #include <QNetworkAccessManager>
 #include <QNetworkReply>
 #include <QString>
+#include <QByteArray>
+#include <QJsonDocument>
+#include <QJsonObject>
 
 Link::Link( QString Url, QString parameter )
     : Url( Url ), parameter( parameter ) {
@@ -58,7 +61,14 @@ void Link::post() const {
     manage->post( netReq, content );
 }
 
-QString Link::getReply( QNetworkReply *reply ) {
-    QString result = reply->readAll();
+QByteArray Link::getReply( QNetworkReply *reply ) {
+    QByteArray result = reply->readAll();
     return result;
+}
+
+QJsonObject Link::jsonDecode(const QByteArray &json)
+{
+    QJsonDocument document = QJsonDocument::fromJson(json);
+    QJsonObject object = document.object();
+    return object;
 }
