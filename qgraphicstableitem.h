@@ -6,7 +6,7 @@
 #include <QGraphicsRectItem>
 #include <QGraphicsTextItem>
 #include <QPen>
-
+#include <QResizeEvent>
 
 class TableColumn;
 
@@ -15,8 +15,8 @@ class QGraphicsTableItem : public QGraphicsRectItem {
 
 public:
     explicit QGraphicsTableItem(
-        TableColumn *parentCol = nullptr, int xPos = 0, int yPos = 0,
-        int width = 0, int height = 0,
+        TableColumn *parentCol = nullptr, TableItem *parentItem = nullptr,
+        int xPos = 0, int yPos = 0, int width = 0, int height = 0,
         QPen    borderPen = QPen( QBrush( Qt::white ), 5 ),
         QBrush  fillBrush = QBrush( QColor( 0, 0, 255, 100 ) ),
         QString text = "", QColor textColor = Qt::white,
@@ -24,9 +24,12 @@ public:
 
     void paint( QPainter *painter, const QStyleOptionGraphicsItem *option,
                 QWidget *widget = nullptr ) override;
+    void resize( QResizeEvent *tableEvent );
+    void resize( int xPos, int yPos, int width, int height );
 
 protected:
     TableColumn *parentColumnPtr;
+    TableItem *  parentItemPtr;
 
     QGraphicsRectItem *backgroundItemPtr;
     QGraphicsTextItem *textItemPtr;

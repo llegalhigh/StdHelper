@@ -1,20 +1,81 @@
 #include "tablecolumn.h"
 
+#include <QDebug>
 
 TableColumn::TableColumn( int index, QDateTime start, QDateTime end,
-                          ClassTable *parent )
+                          ClassTable *parent, int xPos )
     : parentTablePtr( parent ), index( index ),
       width( parentTablePtr->width / parentTablePtr->getColumnNo() ),
-      height( parentTablePtr->height ), visibleWidth( width - 10 ),
+      height( parentTablePtr->height ), visibleWidth( width * 7 / 8 ),
       start( start ), end( start <= end ? end : start ) {
-    QGraphicsRectItem( getXPos(), getYPos(), width, height );
+    QGraphicsRectItem( xPos, getYPos(), width, height );
+    //设置背景矩形
+    bool includeNow = this->includeNow();
+    backgroundItemPtr =
+        new QGraphicsRectItem( xPos, 0, visibleWidth, height, this );
+    backgroundItemPtr->setPen( QPen( QColor( 0, 0, 0, 0 ) ) );
+    backgroundItemPtr->setBrush(
+        QBrush( QColor( 0, 0, 0, includeNow ? 100 : 50 ) ) );
+    backgroundItemPtr->setFlags( QGraphicsItem::ItemIsMovable );
+    //设置时间线（如果有的话）
+    QDateTime curDT = QDateTime::currentDateTime();
+    if ( includeNow ) {
+        timeLineItemPtr =
+            new QGraphicsLineItem( xPos, itemYPosShouldBe( curDT ),
+                                   xPos + visibleWidth - timeLineWidth / 2,
+                                   itemYPosShouldBe( curDT ), this );
+        timeLineItemPtr->setPen(
+            QPen( QBrush( timeLineColor ), timeLineWidth ) );
+    } else {
+        timeLineItemPtr = new QGraphicsLineItem( this );
+        timeLineItemPtr->setVisible( false );
+    }
 
     //初始化（清空）列表
     childrenItemPtrList.clear();
+    childQGraphicsItemPtrList.clear();
 }
 
 TableColumn::~TableColumn() {
     qDeleteAll( childrenItemPtrList );
+}
+
+void TableColumn::paint( QPainter *                      painter,
+                         const QStyleOptionGraphicsItem *option,
+                         QWidget *                       widget ) {
+    backgroundItemPtr->paint( painter, option, widget );
+    timeLineItemPtr->paint( painter, option, widget );
+}
+
+void TableColumn::resize( QResizeEvent *tableEvent ) {
+    //更新自己
+    QSize newSize = ClassTable::scaleSize( QSize( width, height ), tableEvent );
+    width         = newSize.width();
+    height        = newSize.height();
+    ////width = parentTablePtr->width / parentTablePtr->getColumnNo();
+    ////height = parentTablePtr->height;
+    visibleWidth = width * 7 / 8;
+    //因为要先初始化width和height，所以父类构造函数必须放在后面
+    QGraphicsRectItem( getXPos(), getYPos(), width, height );
+
+    //更新背景
+    QRectF originalRect = backgroundItemPtr->rect();
+    QRectF newRect      = ClassTable::scaleSize( originalRect, tableEvent );
+    backgroundItemPtr->setRect(
+        ClassTable::scaleSize( backgroundItemPtr->rect(), tableEvent ) );
+    ////backgroundItemPtr->setRect(getXPos(), 0, visibleWidth, height);
+    //更新时间线
+    timeLineItemPtr->setLine(
+        ClassTable::scaleSize( timeLineItemPtr->line(), tableEvent ) );
+    /**
+    QDateTime curDT     = QDateTime::currentDateTime();
+    if (includeNow()) {
+        timeLineItemPtr->setLine(getXPos(), itemYPosShouldBe( curDT ),
+                             getXPos() + visibleWidth - timeLineWidth / 2,
+    itemYPosShouldBe( curDT )); } else {
+
+    }
+    **/
 }
 
 /**
@@ -69,7 +130,7 @@ int TableColumn::itemYPosShouldBe( QDateTime itemStart, QDateTime colStart,
                                    QDateTime colEnd, int colHeight ) {
     return (int)( ( (qreal)colStart.secsTo( itemStart )
                     / (qreal)colStart.secsTo( colEnd ) )
-                  * colHeight );
+                  * colHeight );   //提示old-style cast不用管
 }
 /**
  * @overload
@@ -79,25 +140,34 @@ int TableColumn::itemYPosShouldBe( QDateTime itemStart ) const {
     return itemYPosShouldBe( itemStart, start, end, height );
 }
 
+bool TableColumn::includeNow() const {
+    QDateTime currentDateTime = QDateTime::currentDateTime();
+    return start <= currentDateTime && currentDateTime <= end;
+}
+
 void TableColumn::drawOnTable() const {
-    // 绘制底色、当前时间线
-    QDateTime curDT     = QDateTime::currentDateTime();
-    int       lineWidth = 3;
-    if ( start <= curDT && curDT <= end ) {
-        parentTablePtr->scenePtr->addRect( getXPos(), 0, visibleWidth, height,
-                                           QPen( QColor( 0, 0, 0, 0 ) ),
-                                           QBrush( QColor( 0, 0, 0, 100 ) ) );
-        parentTablePtr->scenePtr->addLine(
-            getXPos(), itemYPosShouldBe( curDT ),
-            getXPos() + visibleWidth - lineWidth / 2, itemYPosShouldBe( curDT ),
-            QPen( QBrush( Qt::red ), lineWidth ) );
-    } else {
-        parentTablePtr->scenePtr->addRect( getXPos(), 0, visibleWidth, height,
-                                           QPen( QColor( 0, 0, 0, 0 ) ),
-                                           QBrush( QColor( 0, 0, 0, 50 ) ) );
-    }
-    // 绘制item
-    for ( TableItem *childItemPtr : childrenItemPtrList ) {
-        childItemPtr->drawOnTable( parentTablePtr->scenePtr );
-    }
+    parentTablePtr->scenePtr->addItem( backgroundItemPtr );
+    parentTablePtr->scenePtr->addItem( timeLineItemPtr );
+    /**
+   // 绘制底色、当前时间线
+   QDateTime curDT     = QDateTime::currentDateTime();
+   int       lineWidth = 3;
+   if ( start <= curDT && curDT <= end ) {
+       parentTablePtr->scenePtr->addRect( getXPos(), 0, visibleWidth, height,
+                                          QPen( QColor( 0, 0, 0, 0 ) ),
+                                          QBrush( QColor( 0, 0, 0, 100 ) ) );
+       parentTablePtr->scenePtr->addLine(
+           getXPos(), itemYPosShouldBe( curDT ),
+           getXPos() + visibleWidth - lineWidth / 2, itemYPosShouldBe( curDT ),
+           QPen( QBrush( Qt::red ), lineWidth ) );
+   } else {
+       parentTablePtr->scenePtr->addRect( getXPos(), 0, visibleWidth, height,
+                                          QPen( QColor( 0, 0, 0, 0 ) ),
+                                          QBrush( QColor( 0, 0, 0, 50 ) ) );
+   }
+   // 绘制item
+   for ( TableItem *childItemPtr : childrenItemPtrList ) {
+       childItemPtr->drawOnTable( parentTablePtr->scenePtr );
+   }
+   */
 }

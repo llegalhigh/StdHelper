@@ -5,6 +5,7 @@
 
 #include <QDebug>
 
+
 ClassTable::ClassTable( MainWindow *pw, QGraphicsView *pv )
     : firstDayOfWeek( Monday ), windowPtr( pw ), viewPtr( pv ),
       scenePtr( new QGraphicsScene() ),
@@ -31,35 +32,40 @@ ClassTable::ClassTable( MainWindow *pw, QGraphicsView *pv )
     height = windowHeight;
 
     //增加背景图片item
-    backgroundImageItemPtr->setPos( 0, 0 );
+    backgroundImageFilePath = ":/image/tableBackgroundImage";
+    setBackgroundImage( backgroundImageFilePath );
     scenePtr->addItem( backgroundImageItemPtr );
-    setBackgroundImage( "D:/1.jpg" );
 
+    //初始化columnList
     columnList.clear();
     QDate currentDate = QDate::currentDate();
-    for ( int colIndex : columnIndexList ) {
+    int   colNum      = getColumnNo();
+    for ( int listIndex = 0; listIndex < columnIndexList.length();
+          ++listIndex ) {
+        int colIndex = columnIndexList[listIndex];
         //星期几暂时以colIndex代替
         QDate colDate = sameWeek( dayOfWeek( colIndex ), currentDate );
         // QDateTime startDT(colDate, QTime(0,0,0));
         // QDateTime endDT(colDate, QTime(23,59,59));
         QDateTime    startDT( colDate, QTime( 8, 0, 0 ) );
         QDateTime    endDT( colDate, QTime( 18, 0, 0 ) );
-        TableColumn *colPtr = new TableColumn( colIndex, startDT, endDT, this );
+        TableColumn *colPtr = new TableColumn( colIndex, startDT, endDT, this,
+                                               listIndex * width / colNum );
         columnList.append( colPtr );
     }
 }
 
 ClassTable::~ClassTable() {
     delete backgroundImageItemPtr;
+    qDeleteAll( columnList );
     delete scenePtr;
 }
 
 void ClassTable::setBackgroundImage( const QString imagePath ) {
+    backgroundImageItemPtr->setPos( 0, 0 );
     QPixmap backgroundPixmap( imagePath );
-    backgroundImageItemPtr->setPixmap(
-        backgroundPixmap.scaled( width, height ) );
-    backgroundImageItemPtr->show();
-    // viewPtr->repaint();   //?
+    backgroundImageItemPtr->setPixmap( backgroundPixmap.scaled(
+        width, height, Qt::KeepAspectRatioByExpanding ) );
 }
 
 int ClassTable::getColumnNo() const {
@@ -79,14 +85,63 @@ void ClassTable::draw() const {
 /**
  * @brief   大小被改变的事件
  * @warning
- * @todo    还没写好 2019.5.26 23:29
+ * @todo
  */
-void ClassTable::resizeEvent() {
+void ClassTable::resize() {
+    //储存oldSize
+    int oldWidth  = width;
+    int oldHeight = height;
+    //更新自己
     width  = windowPtr->width();
     height = windowPtr->getMainHeight();
+    //创建resize事件
+    QSize         oldSize( oldWidth, oldHeight );
+    QSize         newSize( width, height );
+    QResizeEvent *tableEvent = new QResizeEvent( newSize, oldSize );
+
+    //更新背景图片
+    setBackgroundImage( backgroundImageFilePath );
+    //重点：TableColumn和TableItem相互独立，分别更新
     for ( TableColumn *colPtr : columnList ) {
-        colPtr->drawOnTable();
+        colPtr->resize( tableEvent );
     }
+    for ( TableItem *itemPtr : classItemPtrList ) {
+        itemPtr->resize( tableEvent );
+    }
+
+    delete tableEvent;
+}
+
+QSize ClassTable::scaleSize( QSize smallOld, QResizeEvent *event ) {
+    QSize bigNew( event->size() );
+    QSize bigOld( event->oldSize() );
+    return QSize( smallOld.width() * bigNew.width() / bigOld.width(),
+                  smallOld.height() * bigNew.height() / bigOld.height() );
+}
+
+QRectF ClassTable::scaleSize( QRectF smallOld, QResizeEvent *event ) {
+    QSize bigNew( event->size() );
+    QSize bigOld( event->oldSize() );
+    return QRectF( smallOld.x() * bigNew.width() / bigOld.width(),
+                   smallOld.y() * bigNew.height() / bigOld.height(),
+                   smallOld.width() * bigNew.width() / bigOld.width(),
+                   smallOld.height() * bigNew.height() / bigOld.height() );
+}
+
+QLineF ClassTable::scaleSize( QLineF smallOld, QResizeEvent *event ) {
+    QSize bigNew( event->size() );
+    QSize bigOld( event->oldSize() );
+    return QLineF( smallOld.x1() * bigNew.width() / bigOld.width(),
+                   smallOld.y1() * bigNew.height() / bigOld.height(),
+                   smallOld.x2() * bigNew.width() / bigOld.width(),
+                   smallOld.y2() * bigNew.height() / bigOld.height() );
+}
+
+QPointF ClassTable::scaleSize( QPointF smallOld, QResizeEvent *event ) {
+    QSize bigNew( event->size() );
+    QSize bigOld( event->oldSize() );
+    return QPointF( smallOld.x() * bigNew.width() / bigOld.width(),
+                    smallOld.y() * bigNew.height() / bigOld.height() );
 }
 
 /**
