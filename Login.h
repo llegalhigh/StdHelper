@@ -9,6 +9,7 @@
 #include <QJsonObject>
 #include <QJsonValue>
 #include "link.h"
+#include "mainwindow.h"
 
 namespace Ui {
 class Login;
@@ -31,7 +32,7 @@ private slots:
     void loginSend() const; //login按键clicked事件,发送登陆请求
     void registerSend() const;    //register按键clicked事件,发送注册请求
     void cancelInformation() const;   //当得到网络回应时取消显示的"Logining..."或"Registering..."信息
-    void showInformationL(QNetworkReply *) const;   //显示登陆状态信息
+    void showInformationL(QNetworkReply *);   //显示登陆状态信息
     void showInformationR(QNetworkReply *) const;   //显示注册状态信息
     void loginInit() const;   //初始化成登陆页面
     void registerInit() const;    //初始化成注册页面
@@ -39,6 +40,7 @@ private slots:
 private:
     Ui::Login *ui;
     Link *link;
+    MainWindow *mainWindow;
 };
 
 #endif // LOGIN_H

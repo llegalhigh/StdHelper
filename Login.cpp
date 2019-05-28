@@ -7,11 +7,13 @@
 #include "link.h"
 #include "Login.h"
 #include "ui_Login.h"
+#include "mainwindow.h"
 
 Login::Login(QWidget *parent) :
     QWidget(parent),
     ui(new Ui::Login),
-    link(new Link)
+    link(new Link),
+    mainWindow(new MainWindow)
 {
     ui->setupUi(this);
     loginInit();
@@ -21,6 +23,7 @@ Login::~Login()
 {
     delete ui;
     delete link;
+    delete mainWindow;
 }
 
 void Login::loginSetTabOrder() const
@@ -123,7 +126,7 @@ void Login::cancelInformation() const
     link->disconnect();
 }
 
-void Login::showInformationL(QNetworkReply *reply) const
+void Login::showInformationL(QNetworkReply *reply)
 {
     QByteArray json = Link::getReply(reply);
     QJsonObject object = Link::jsonDecode(json);
@@ -136,7 +139,8 @@ void Login::showInformationL(QNetworkReply *reply) const
 
     if(object.value("errcode").toInt() == 0)
     {
-        //这里要补充页面跳转
+        this->close();
+        mainWindow->show();
     }
 
 }
