@@ -8,10 +8,12 @@
 #include <QPen>
 #include <QResizeEvent>
 
+
 class TableColumn;
 
 class QGraphicsTableItem : public QGraphicsRectItem {
     friend class TableItem;
+    friend class TableColumn;
 
 public:
     explicit QGraphicsTableItem(
@@ -24,6 +26,8 @@ public:
 
     void paint( QPainter *painter, const QStyleOptionGraphicsItem *option,
                 QWidget *widget = nullptr ) override;
+    void show();
+    void hide();
     void resize( QResizeEvent *tableEvent );
     void resize( int xPos, int yPos, int width, int height );
 

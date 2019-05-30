@@ -3,22 +3,26 @@
 
 #include <QDebug>
 
+
 //数据存储
 #include <QVariant>
+
 
 //通知
 #include <QMessageBox>
 
-
 /*****************************************************************************
- * 设置文件: setting.dat
+ * 设置文件路径: SETTING_FILE_PATH
  *
  * 设置项:
- *  index    name & description & type
+ *  index   |name & description & type
+ * ---------+---------------------------------------
  *  0        termStartDate, 本学期从什么时候开始(QDate)
  *  1        termTotalWeek, 本学期有多少周(quint8)
  *
- * 文件内容: 4字节魔术数字+4字节版本号+100字节设置0+100字节设置1+...
+ * dat文件内容:
+ *  4字节魔术数字(quint32) -> 4字节版本号(qint32) -> ITEM_SIZE字节设置0
+ *  -> ITEM_SIZE字节设置1 -> ...
  *
  * 二进制文件读写参考：
  * https://www.devbean.net/2013/01/qt-study-road-2-binary-file-io/
@@ -39,7 +43,8 @@ SettingWindow::SettingWindow( MainWindow *parentMain, QWidget *parent )
 
     ui->termStartDateEdit->setMinimumDate(
         QDate::currentDate().addYears( -2 ) );
-    ui->termStartDateEdit->setMaximumDate( QDate::currentDate().addYears( 2 ) );
+    ui->termStartDateEdit->setMaximumDate(
+        QDate::currentDate().addYears( +2 ) );
 
     //设置文件:setting.dat
     QFile settingFile( SETTING_FILE_PATH );
@@ -157,7 +162,8 @@ QVariant SettingWindow::readSettingItem( const qint64 index,
 }
 
 /**
- * @brief   通过stream读取第index项设置，并通过mainPtr将其传递到MainWindow中
+ * @brief
+ * 通过stream读取第index项设置，并通过mainPtr将其传递到MainWindow::ClassTable中
  * @note    static
  * @return  第index项设置对应的QVariant
  * @warning 前提是已经确保setting.dat合法，且stream有read权限
@@ -181,7 +187,8 @@ QVariant SettingWindow::passOne( const qint64 index, QDataStream &stream,
 }
 
 /**
- * @brief   通过stream读取第index项设置以更新SettingWindow，并传递到MainWindow中
+ * @brief
+ * 通过stream读取第index项设置以更新SettingWindow，并传递到MainWindow::ClassTable中
  * @warning 前提是已经确保setting.dat合法，且stream有read权限
  */
 void SettingWindow::updateOne( const qint64 index, QDataStream &stream ) {
@@ -200,7 +207,7 @@ void SettingWindow::updateOne( const qint64 index, QDataStream &stream ) {
 }
 
 /**
- * @brief   通过stream读取dat以更新设置窗口，并传递至MainWindow
+ * @brief   通过stream读取dat以更新设置窗口，并传递至MainWindow::ClassTable
  * @warning 前提是已经确保setting.dat合法，且stream有read权限
  * @todo    无？
  */

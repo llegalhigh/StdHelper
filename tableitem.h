@@ -7,15 +7,24 @@
 #include <QGraphicsItem>
 #include <QList>
 
+
 class ClassTable;
 class TableColumn;
 
 class TableItem {
+    friend class ClassTable;
+
 public:
     //构造函数
-    TableItem( const QString, const QDateTime, const QDateTime, ClassTable * );
+    TableItem( const QString   itemText  = "",
+               const QDateTime st        = QDateTime::currentDateTime(),
+               const QDateTime ed        = QDateTime::currentDateTime(),
+               ClassTable *    parentPtr = nullptr );
     //析构函数
     virtual ~TableItem();
+
+    void show();
+    void hide();
 
     //绘制
     void drawOnTable( QGraphicsScene * ) const;

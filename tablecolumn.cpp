@@ -2,12 +2,14 @@
 
 #include <QDebug>
 
+
 TableColumn::TableColumn( int index, QDateTime start, QDateTime end,
                           ClassTable *parent, int xPos )
     : parentTablePtr( parent ), index( index ),
       width( parentTablePtr->width / parentTablePtr->getColumnNo() ),
       height( parentTablePtr->height ), visibleWidth( width * 7 / 8 ),
       start( start ), end( start <= end ? end : start ) {
+    //调用父类构造函数
     QGraphicsRectItem( xPos, getYPos(), width, height );
     //设置背景矩形
     bool includeNow = this->includeNow();
@@ -16,7 +18,7 @@ TableColumn::TableColumn( int index, QDateTime start, QDateTime end,
     backgroundItemPtr->setPen( QPen( QColor( 0, 0, 0, 0 ) ) );
     backgroundItemPtr->setBrush(
         QBrush( QColor( 0, 0, 0, includeNow ? 100 : 50 ) ) );
-    backgroundItemPtr->setFlags( QGraphicsItem::ItemIsMovable );
+    backgroundItemPtr->setZValue( 1 );
     //设置时间线（如果有的话）
     QDateTime curDT = QDateTime::currentDateTime();
     if ( includeNow ) {
@@ -30,6 +32,8 @@ TableColumn::TableColumn( int index, QDateTime start, QDateTime end,
         timeLineItemPtr = new QGraphicsLineItem( this );
         timeLineItemPtr->setVisible( false );
     }
+    timeLineItemPtr->setZValue( 5 );
+    // this->hide(); //先不显示
 
     //初始化（清空）列表
     childrenItemPtrList.clear();
@@ -37,14 +41,36 @@ TableColumn::TableColumn( int index, QDateTime start, QDateTime end,
 }
 
 TableColumn::~TableColumn() {
-    qDeleteAll( childrenItemPtrList );
+    // qDeleteAll( childrenItemPtrList );
 }
 
 void TableColumn::paint( QPainter *                      painter,
                          const QStyleOptionGraphicsItem *option,
                          QWidget *                       widget ) {
+    // QGraphicsRectItem::paint(painter, option, widget);
     backgroundItemPtr->paint( painter, option, widget );
     timeLineItemPtr->paint( painter, option, widget );
+    for ( QGraphicsTableItem *itemPtr : childQGraphicsItemPtrList ) {
+        itemPtr->paint( painter, option, widget );
+    }
+}
+
+void TableColumn::show() {
+    // QGraphicsRectItem::show();
+    backgroundItemPtr->show();
+    timeLineItemPtr->show();
+    for ( QGraphicsTableItem *itemPtr : childQGraphicsItemPtrList ) {
+        itemPtr->show();
+    }
+}
+
+void TableColumn::hide() {
+    // QGraphicsRectItem::hide();
+    backgroundItemPtr->hide();
+    timeLineItemPtr->hide();
+    for ( QGraphicsTableItem *itemPtr : childQGraphicsItemPtrList ) {
+        itemPtr->hide();
+    }
 }
 
 void TableColumn::resize( QResizeEvent *tableEvent ) {
@@ -61,8 +87,7 @@ void TableColumn::resize( QResizeEvent *tableEvent ) {
     //更新背景
     QRectF originalRect = backgroundItemPtr->rect();
     QRectF newRect      = ClassTable::scaleSize( originalRect, tableEvent );
-    backgroundItemPtr->setRect(
-        ClassTable::scaleSize( backgroundItemPtr->rect(), tableEvent ) );
+    backgroundItemPtr->setRect( newRect );
     ////backgroundItemPtr->setRect(getXPos(), 0, visibleWidth, height);
     //更新时间线
     timeLineItemPtr->setLine(
@@ -76,6 +101,21 @@ void TableColumn::resize( QResizeEvent *tableEvent ) {
 
     }
     **/
+}
+
+void TableColumn::remove() {
+    qDebug() << "\tRemoving TableColumn " << index << " {";
+    QGraphicsScene *scenePtr = parentTablePtr->scenePtr;
+    scenePtr->removeItem( backgroundItemPtr );
+    scenePtr->removeItem( timeLineItemPtr );
+    for ( QGraphicsTableItem *itemPtr : childQGraphicsItemPtrList ) {
+        scenePtr->removeItem( itemPtr->textItemPtr );
+        scenePtr->removeItem( itemPtr->backgroundItemPtr );
+        scenePtr->removeItem( itemPtr );
+        qDebug() << "\t\tRemoved QGraphicsTableItem "
+                 << itemPtr->textItemPtr->toPlainText();
+    }
+    qDebug() << "\t} Removed TableColumn " << index;
 }
 
 /**
@@ -146,6 +186,7 @@ bool TableColumn::includeNow() const {
 }
 
 void TableColumn::drawOnTable() const {
+    qDebug() << "\tStart TableColumn " << index << " {";
     parentTablePtr->scenePtr->addItem( backgroundItemPtr );
     parentTablePtr->scenePtr->addItem( timeLineItemPtr );
     /**
@@ -165,9 +206,10 @@ void TableColumn::drawOnTable() const {
                                           QPen( QColor( 0, 0, 0, 0 ) ),
                                           QBrush( QColor( 0, 0, 0, 50 ) ) );
    }
-   // 绘制item
-   for ( TableItem *childItemPtr : childrenItemPtrList ) {
-       childItemPtr->drawOnTable( parentTablePtr->scenePtr );
-   }
    */
+    // 绘制item
+    for ( TableItem *childItemPtr : childrenItemPtrList ) {
+        childItemPtr->drawOnTable( parentTablePtr->scenePtr );
+    }
+    qDebug() << "\t} Finish TableColumn " << index;
 }

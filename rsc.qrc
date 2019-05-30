@@ -1,5 +1,16 @@
 <RCC>
     <qresource prefix="/image">
-        <file alias="tableBackgroundImage">D:/1.jpg</file>
+        <file alias="loginBackground">Images/loginBackground.jpg</file>
+        <file alias="tableBackgroundImage">Images/tableBackgroundImage.jpg</file>
+    </qresource>
+    <qresource prefix="/icon">
+        <file alias="add.ico">Icon/add.ico</file>
+        <file alias="brain.ico">Icon/brain.ico</file>
+        <file alias="power.ico">Icon/power.ico</file>
+        <file alias="setting.ico">Icon/setting.ico</file>
+        <file alias="whitepower.ico">Icon/whitepower.ico</file>
+    </qresource>
+    <qresource prefix="/">
+        <file>black.qss</file>
     </qresource>
 </RCC>

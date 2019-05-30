@@ -11,6 +11,7 @@
 #include <QMainWindow>
 #include <QString>
 
+
 class TableColumn;
 
 class ClassTable {
@@ -78,10 +79,15 @@ protected:
     QDate  termStartDate;
     quint8 termTotalWeek;
 
+    //ÖÜÊý
     int          whichWeek( const QDate & = QDate::currentDate() ) const;
     static QDate sameWeek( const dayOfWeek day,
                            const QDate &   date       = QDate::currentDate(),
                            const int       weekOffset = 0 );
+
+    void      setWeek( int week, QDate relativeDate );
+    QDateTime start, end;
+    int       weekOnTable;
 };
 
 #endif   // CLASSTABLE_H

@@ -10,6 +10,7 @@
 #include <QGraphicsRectItem>
 #include <QList>
 
+
 class TableColumn : public QGraphicsRectItem {
     friend class ClassTable;
     friend class TableItem;
@@ -23,8 +24,11 @@ public:
 
     void paint( QPainter *painter, const QStyleOptionGraphicsItem *option,
                 QWidget *widget = nullptr ) override;
+    void show();
+    void hide();
 
     void resize( QResizeEvent *tableEvent );
+    void remove();
 
     void setStart( QDateTime );
     void setEnd( QDateTime );

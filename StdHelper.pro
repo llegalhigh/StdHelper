@@ -4,7 +4,9 @@
 #
 #-------------------------------------------------
 
-QT       += core gui
+QT       += core gui \
+            network
+RC_ICONS = icon/brain.ico
 
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
@@ -25,7 +27,11 @@ DEFINES += QT_DEPRECATED_WARNINGS
 CONFIG += c++11
 
 SOURCES += \
+        Login.cpp \
+        addclassdialog.cpp \
         classtable.cpp \
+        classtableitem.cpp \
+        link.cpp \
         loginform.cpp \
         main.cpp \
         mainwindow.cpp \
@@ -35,15 +41,21 @@ SOURCES += \
         tableitem.cpp
 
 HEADERS += \
+        Login.h \
+        addclassdialog.h \
         classtable.h \
+        classtableitem.h \
+        link.h \
         loginform.h \
-        mainwindow.h \
         qgraphicstableitem.h \
         settingwindow.h \
         tablecolumn.h \
-        tableitem.h
+        tableitem.h \
+        mainwindow.h
 
 FORMS += \
+        Login.ui \
+        addclassdialog.ui \
         loginform.ui \
         mainwindow.ui \
         settingwindow.ui
@@ -52,3 +64,6 @@ FORMS += \
 qnx: target.path = /tmp/$${TARGET}/bin
 else: unix:!android: target.path = /opt/$${TARGET}/bin
 !isEmpty(target.path): INSTALLS += target
+
+RESOURCES += \
+    rsc.qrc

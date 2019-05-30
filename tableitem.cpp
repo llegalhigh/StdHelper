@@ -2,8 +2,10 @@
 #include "tablecolumn.h"
 #include "tableitem.h"
 
+#include <QDebug>
 #include <QGraphicsScene>
 #include <QGraphicsTextItem>
+
 
 TableItem::TableItem( const QString itemText, const QDateTime st,
                       const QDateTime ed, ClassTable *parentPtr )
@@ -18,10 +20,26 @@ TableItem::~TableItem() {
     }
 }
 
+void TableItem::show() {
+    for ( QGraphicsTableItem *itemPtr : childQGraphicsItemPtrList ) {
+        itemPtr->show();
+    }
+}
+
+void TableItem::hide() {
+    for ( QGraphicsTableItem *itemPtr : childQGraphicsItemPtrList ) {
+        itemPtr->hide();
+    }
+}
+
 void TableItem::drawOnTable( QGraphicsScene *scene ) const {
-    for ( QGraphicsItem *itemPtr : childQGraphicsItemPtrList ) {
+    qDebug() << "\t\tStart TableItem {";
+    for ( QGraphicsTableItem *itemPtr : childQGraphicsItemPtrList ) {
+        qDebug() << "\t\t\tStart QGraphicsTableItem "
+                 << itemPtr->textItemPtr->toPlainText();
         parentTablePtr->scenePtr->addItem( itemPtr );
     }
+    qDebug() << "\t\t} Finish TableItem";
 }
 
 void TableItem::resize( QResizeEvent *tableEvent ) {
@@ -44,6 +62,7 @@ void TableItem::setText( const QString text ) {
  */
 void TableItem::findParentColumns() {
     parentColumnPtrList.clear();
+    childQGraphicsItemPtrList.clear();   //之前因为没加这个导致显示重叠
     for ( TableColumn *colPtr : parentTablePtr->columnList ) {
         QDateTime colStartTime = colPtr->start;
         QDateTime colEndTime   = colPtr->end;
@@ -56,7 +75,8 @@ void TableItem::findParentColumns() {
 
             // 设置边框
             QPen borderPen = QPen( QBrush( Qt::white ), this->borderWidth );
-            borderPen.setJoinStyle( Qt::RoundJoin );
+            borderPen.setJoinStyle(
+                Qt::RoundJoin );   //提示old-style cast不用管
             int xPos = colPtr->getXPos()
                        + (int)( borderWidth / 2 );   //边框左上顶点X,Y坐标
             int yPos =
@@ -65,16 +85,18 @@ void TableItem::findParentColumns() {
             int rectHeight =
                 colPtr->itemYPosShouldBe( endTime ) - yPos - (int)borderWidth;
             // 设置底色
-            QBrush fillBrush = QBrush( QColor( 0, 0, 255, 100 ) );
+            QBrush fillBrush = QBrush( QColor( 0, 0, 255, 50 ) );
 
             // 设置文字字体
             QFont textFont;
             textFont.setBold( true );
-            textFont.setPointSize( 10 );
+            textFont.setPointSize( 8 );
 
             QGraphicsTableItem *childItemPtr = new QGraphicsTableItem(
                 colPtr, this, xPos, yPos, rectWidth, rectHeight, borderPen,
                 fillBrush, text );
+            childItemPtr->setFlags( QGraphicsItem::ItemIsSelectable );
+
             this->childQGraphicsItemPtrList.append( childItemPtr );
             colPtr->childQGraphicsItemPtrList.append( childItemPtr );
         }

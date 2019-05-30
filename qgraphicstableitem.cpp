@@ -1,6 +1,7 @@
 #include "qgraphicstableitem.h"
 #include "tablecolumn.h"
 
+
 QGraphicsTableItem::QGraphicsTableItem( TableColumn *parentCol,
                                         TableItem *parentItem, int xPos,
                                         int yPos, int width, int height,
@@ -13,14 +14,16 @@ QGraphicsTableItem::QGraphicsTableItem( TableColumn *parentCol,
       //初始化child，指定自己为他们的parent
       backgroundItemPtr(
           new QGraphicsRectItem( xPos, yPos, width, height, this ) ),
-      textItemPtr( new QGraphicsTextItem( text, this ) ) {
+      textItemPtr( new QGraphicsTextItem( text, backgroundItemPtr ) ) {
     backgroundItemPtr->setPen( borderPen );
     backgroundItemPtr->setBrush( fillBrush );
+    backgroundItemPtr->setZValue( 3 );
 
     textItemPtr->setDefaultTextColor( textColor );
     textItemPtr->setPos( xPos, yPos );
     textItemPtr->setTextWidth( width );
     textItemPtr->setFont( textFont );
+    textItemPtr->setZValue( 4 );
 }
 
 void QGraphicsTableItem::paint( QPainter *                      painter,
@@ -28,6 +31,18 @@ void QGraphicsTableItem::paint( QPainter *                      painter,
                                 QWidget *                       widget ) {
     backgroundItemPtr->paint( painter, option, widget );
     textItemPtr->paint( painter, option, widget );
+}
+
+void QGraphicsTableItem::show() {
+    // QGraphicsRectItem::show();
+    backgroundItemPtr->show();
+    textItemPtr->show();
+}
+
+void QGraphicsTableItem::hide() {
+    // QGraphicsRectItem::hide();
+    backgroundItemPtr->hide();
+    textItemPtr->hide();
 }
 
 void QGraphicsTableItem::resize( QResizeEvent *tableEvent ) {

@@ -4,55 +4,41 @@
 #include "ui_mainwindow.h"
 
 #include <QDebug>
+#include <QGraphicsBlurEffect>
 
 
+/**
+ * @brief   ClassTable的构造函数
+ * @warning 未能被初始化的变量有：
+ *              1. termStartDate, termTotalWeek, ...
+ *                 需要通过SettingWindow传递(PassAll)
+ *              2. start, end, weekOnTable
+ */
 ClassTable::ClassTable( MainWindow *pw, QGraphicsView *pv )
     : firstDayOfWeek( Monday ), windowPtr( pw ), viewPtr( pv ),
       scenePtr( new QGraphicsScene() ),
       backgroundImageItemPtr( new QGraphicsPixmapItem() ),
+      backgroundImageFilePath( ":/image/tableBackgroundImage" ),
       columnIndexList( { 1, 2, 3, 4, 5, 6, 7 } ) {
     //设置view
-    int windowWidth  = windowPtr->width();
-    int windowHeight = windowPtr->getMainHeight();
-    // viewPtr->setGeometry(0,0,windowWidth,windowHeight);
-    /*
-    viewPtr->setGeometry( 15, 15, windowPtr->width() * 4 / 5,
-                          windowPtr->height() * 4 / 5 );
-    */
     viewPtr->setAlignment( Qt::AlignLeft | Qt::AlignTop );
     viewPtr->setVerticalScrollBarPolicy(
         Qt::ScrollBarAlwaysOff );   //禁止滚动条
     viewPtr->setHorizontalScrollBarPolicy( Qt::ScrollBarAlwaysOff );
-    //设置scene
-
     //将view绑定至scene
     viewPtr->setScene( scenePtr );
 
-    width  = windowWidth;
-    height = windowHeight;
-
+    //设置自己
+    width  = viewPtr->width();
+    height = viewPtr->height();
     //增加背景图片item
-    backgroundImageFilePath = ":/image/tableBackgroundImage";
     setBackgroundImage( backgroundImageFilePath );
     scenePtr->addItem( backgroundImageItemPtr );
 
-    //初始化columnList
-    columnList.clear();
-    QDate currentDate = QDate::currentDate();
-    int   colNum      = getColumnNo();
-    for ( int listIndex = 0; listIndex < columnIndexList.length();
-          ++listIndex ) {
-        int colIndex = columnIndexList[listIndex];
-        //星期几暂时以colIndex代替
-        QDate colDate = sameWeek( dayOfWeek( colIndex ), currentDate );
-        // QDateTime startDT(colDate, QTime(0,0,0));
-        // QDateTime endDT(colDate, QTime(23,59,59));
-        QDateTime    startDT( colDate, QTime( 8, 0, 0 ) );
-        QDateTime    endDT( colDate, QTime( 18, 0, 0 ) );
-        TableColumn *colPtr = new TableColumn( colIndex, startDT, endDT, this,
-                                               listIndex * width / colNum );
-        columnList.append( colPtr );
-    }
+    //默认初始显示当前周
+    // setWeek(1, QDate::currentDate());
+
+    classItemPtrList.clear();
 }
 
 ClassTable::~ClassTable() {
@@ -62,10 +48,17 @@ ClassTable::~ClassTable() {
 }
 
 void ClassTable::setBackgroundImage( const QString imagePath ) {
+    //调整位置
     backgroundImageItemPtr->setPos( 0, 0 );
+    backgroundImageItemPtr->setZValue( 0 );
+    //设置图像
     QPixmap backgroundPixmap( imagePath );
     backgroundImageItemPtr->setPixmap( backgroundPixmap.scaled(
         width, height, Qt::KeepAspectRatioByExpanding ) );
+    //模糊化
+    QGraphicsBlurEffect *effect = new QGraphicsBlurEffect();
+    effect->setBlurRadius( 5 );
+    backgroundImageItemPtr->setGraphicsEffect( effect );
 }
 
 int ClassTable::getColumnNo() const {
@@ -74,12 +67,15 @@ int ClassTable::getColumnNo() const {
 
 void ClassTable::addItem( TableItem *itemPtr ) {
     classItemPtrList.append( itemPtr );
+    itemPtr->parentTablePtr = this;
 }
 
 void ClassTable::draw() const {
+    qDebug() << "Start ClassTable {";
     for ( TableColumn *colPtr : columnList ) {
         colPtr->drawOnTable();
     }
+    qDebug() << "} Finish ClassTable";
 }
 
 /**
@@ -92,8 +88,8 @@ void ClassTable::resize() {
     int oldWidth  = width;
     int oldHeight = height;
     //更新自己
-    width  = windowPtr->width();
-    height = windowPtr->getMainHeight();
+    width  = viewPtr->width();
+    height = viewPtr->height();
     //创建resize事件
     QSize         oldSize( oldWidth, oldHeight );
     QSize         newSize( width, height );
@@ -112,13 +108,15 @@ void ClassTable::resize() {
     delete tableEvent;
 }
 
+/**
+ * @brief   计算图形拉伸，用于部件自适应大小
+ */
 QSize ClassTable::scaleSize( QSize smallOld, QResizeEvent *event ) {
     QSize bigNew( event->size() );
     QSize bigOld( event->oldSize() );
     return QSize( smallOld.width() * bigNew.width() / bigOld.width(),
                   smallOld.height() * bigNew.height() / bigOld.height() );
 }
-
 QRectF ClassTable::scaleSize( QRectF smallOld, QResizeEvent *event ) {
     QSize bigNew( event->size() );
     QSize bigOld( event->oldSize() );
@@ -127,7 +125,6 @@ QRectF ClassTable::scaleSize( QRectF smallOld, QResizeEvent *event ) {
                    smallOld.width() * bigNew.width() / bigOld.width(),
                    smallOld.height() * bigNew.height() / bigOld.height() );
 }
-
 QLineF ClassTable::scaleSize( QLineF smallOld, QResizeEvent *event ) {
     QSize bigNew( event->size() );
     QSize bigOld( event->oldSize() );
@@ -136,16 +133,16 @@ QLineF ClassTable::scaleSize( QLineF smallOld, QResizeEvent *event ) {
                    smallOld.x2() * bigNew.width() / bigOld.width(),
                    smallOld.y2() * bigNew.height() / bigOld.height() );
 }
-
 QPointF ClassTable::scaleSize( QPointF smallOld, QResizeEvent *event ) {
     QSize bigNew( event->size() );
     QSize bigOld( event->oldSize() );
     return QPointF( smallOld.x() * bigNew.width() / bigOld.width(),
                     smallOld.y() * bigNew.height() / bigOld.height() );
 }
+/** scaleSize重载结束 */
 
 /**
- * @brief   返回date是本学期的第几周
+ * @brief   根据termStartDate，计算date是本学期的第几周
  * @default date默认是当前日期
  */
 int ClassTable::whichWeek( const QDate &date ) const {
@@ -161,4 +158,38 @@ int ClassTable::whichWeek( const QDate &date ) const {
 QDate ClassTable::sameWeek( const ClassTable::dayOfWeek day, const QDate &date,
                             const int weekOffset ) {
     return date.addDays( weekOffset * 7 + day - date.dayOfWeek() );
+}
+
+/**
+ * @brief   设置显示(相对于relativeDate的)第week周
+ * @note    week=1是同一周
+ */
+void ClassTable::setWeek( int week, QDate relativeDate ) {
+    for ( TableColumn *colPtr : columnList ) {
+        colPtr->remove();
+    }
+    columnList.clear();
+
+    weekOnTable = week;
+    start       = QDateTime( sameWeek( Monday, relativeDate, week - 1 ),
+                       QTime( 0, 0, 0 ) );
+    end         = QDateTime( sameWeek( Sunday, relativeDate, week - 1 ),
+                     QTime( 0, 0, 0 ) );
+    for ( int listIndex = 0; listIndex < columnIndexList.length();
+          ++listIndex ) {
+        int colIndex = columnIndexList[listIndex];
+        //星期几暂时以colIndex代替
+        QDate colDate =
+            sameWeek( dayOfWeek( colIndex ), relativeDate, week - 1 );
+        QDateTime    startDT( colDate, QTime( 0, 0, 0 ) );
+        QDateTime    endDT( colDate, QTime( 23, 59, 59 ) );
+        int          colNum = getColumnNo();
+        TableColumn *colPtr = new TableColumn( colIndex, startDT, endDT, this,
+                                               listIndex * width / colNum );
+        columnList.append( colPtr );
+    }
+
+    for ( TableItem *itemPtr : classItemPtrList ) {
+        itemPtr->findParentColumns();
+    }
 }
