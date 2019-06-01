@@ -6,6 +6,7 @@
 #include <QByteArray>
 #include <QJsonDocument>
 #include <QJsonObject>
+#include <QProcess>
 
 Link::Link( QString Url, QString parameter )
     : Url( Url ), parameter( parameter ) {
@@ -59,6 +60,32 @@ void Link::post() const {
     netReq.setHeader( QNetworkRequest::ContentTypeHeader,
                       "application/x-www-form-urlencoded" );
     manage->post( netReq, content );
+}
+
+bool Link::checkNetwork() const
+{
+    // #Linuxָ® "ping -s 1 -c 1 IP"
+    //QString cmdstr = QString("ping -s 1 -c 1 %1")
+    //      .arg(ip);
+
+    // #Windowsָ® "ping IP -n 1 -w Ӭʱ(ms)"
+    QString cmdstr = QString("ping %1 -n 1 -w %2")
+            .arg("111.230.183.100").arg(1000);
+
+    QProcess cmd;
+    cmd.start(cmdstr);
+    cmd.waitForReadyRead(1000);
+    cmd.waitForFinished(1000);
+
+    QString response = cmd.readAll();
+    if (response.indexOf("TTL") == -1)
+    {
+        return false;
+    }
+    else
+    {
+        return true;
+    }
 }
 
 QByteArray Link::getReply( QNetworkReply *reply ) {

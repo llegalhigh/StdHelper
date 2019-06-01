@@ -35,6 +35,8 @@ public:
 
     void post() const;   //利用POST方式发送请求
 
+    bool checkNetwork() const;
+
     static QByteArray getReply(
         QNetworkReply
             * );   //获取回应信息(QByteArray),这是static函数,可以不创建对象直接用

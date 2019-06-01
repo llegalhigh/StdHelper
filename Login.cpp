@@ -99,7 +99,10 @@ void Login::loginSend() const
     link->addParameter("password",password);    //添加参数
     //link->connect(this,SLOT(cancelInformation()));  //绑定槽函数(网络请求完成时触发槽函数),取消"Logining..."信息显示
     link->connect(this,SLOT(showInformationL(QNetworkReply *))); //绑定槽函数(网络请求完成时触发槽函数),显示返回信息
-    link->post();   //发送POST请求
+    if(link->checkNetwork())
+        link->post();   //发送POST请求
+    else
+        ui->label_information->setText(QObject::tr("No Network!"));
 }
 
 void Login::registerSend() const
@@ -116,7 +119,10 @@ void Login::registerSend() const
     link->addParameter("checkpwd",confirmpwd);
     //link->connect(this,SLOT(cancelInformation()));  //绑定槽函数(网络请求完成时触发槽函数)
     link->connect(this,SLOT(showInformationR(QNetworkReply *))); //绑定槽函数(网络请求完成时触发槽函数),显示返回信息
-    link->post();   //发送POST请求
+    if(link->checkNetwork())
+        link->post();   //发送POST请求
+    else
+        ui->label_information->setText(QObject::tr("No Network!"));
 
 }
 
@@ -137,7 +143,7 @@ void Login::showInformationL(QNetworkReply *reply)
     link->disconnect();
 
 
-    if(object.value("errcode").toInt() == 0)
+    if(object.value("errcode").toInt() == 1)
     {
         this->close();
         mainWindow->show();
@@ -150,7 +156,7 @@ void Login::showInformationR(QNetworkReply *reply) const
     QByteArray json = Link::getReply(reply);
     QJsonObject object = Link::jsonDecode(json);
 
-    if(object.value("errcode").toInt() == 0)
+    if(object.value("errcode").toInt() == 1)
         loginInit();
 
     QString msg = object.value("msg").toString();
