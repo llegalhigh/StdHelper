@@ -19,7 +19,7 @@ public:
 
 private slots:
     void on_addClassButton_clicked();
-    void AddClassDialog::addCourse(QString user_id, QString name, QString abbr, QString teacher,
+    void addCourse(QString user_id, QString name, QString abbr, QString teacher,
                                    QString location, QString week, QString day, QString start, QString end);
 private:
     Ui::AddClassDialog *ui;
