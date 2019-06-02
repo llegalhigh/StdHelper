@@ -32,13 +32,18 @@ SOURCES += \
         classtable.cpp \
         classtableitem.cpp \
         link.cpp \
-        loginform.cpp \
         main.cpp \
         mainwindow.cpp \
         qgraphicstableitem.cpp \
+        sectionscombobox.cpp \
+        sectionscomboboxdelegate.cpp \
+        selectweekdialog.cpp \
         settingwindow.cpp \
+        subclass.cpp \
         tablecolumn.cpp \
-        tableitem.cpp
+        tableitem.cpp \
+        weekbuttondelegate.cpp \
+        weekcomboboxdelegate.cpp
 
 HEADERS += \
         Login.h \
@@ -46,18 +51,24 @@ HEADERS += \
         classtable.h \
         classtableitem.h \
         link.h \
-        loginform.h \
         qgraphicstableitem.h \
+        sectionscombobox.h \
+        sectionscomboboxdelegate.h \
+        selectweekdialog.h \
         settingwindow.h \
+        subclass.h \
         tablecolumn.h \
         tableitem.h \
-        mainwindow.h
+        mainwindow.h \
+        weekbuttondelegate.h \
+        weekcomboboxdelegate.h
 
 FORMS += \
         Login.ui \
         addclassdialog.ui \
-        loginform.ui \
         mainwindow.ui \
+        sectionscombobox.ui \
+        selectweekdialog.ui \
         settingwindow.ui
 
 # Default rules for deployment.

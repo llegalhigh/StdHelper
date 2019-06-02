@@ -2,10 +2,9 @@
 
 #include <QDebug>
 
-
 TableColumn::TableColumn( int index, QDateTime start, QDateTime end,
                           ClassTable *parent, int xPos )
-    : parentTablePtr( parent ), index( index ),
+    : parentTablePtr( parent ), index( ClassTable::dayOfWeek( index ) ),
       width( parentTablePtr->width / parentTablePtr->getColumnNo() ),
       height( parentTablePtr->height ), visibleWidth( width * 7 / 8 ),
       start( start ), end( start <= end ? end : start ) {

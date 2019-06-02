@@ -11,7 +11,6 @@
 #include <QMainWindow>
 #include <QString>
 
-
 class TableColumn;
 
 class ClassTable {
@@ -19,6 +18,7 @@ class ClassTable {
     friend class SettingWindow;
     friend class TableColumn;
     friend class TableItem;
+    friend class Subclass;
 
 public:
     //构造函数
@@ -51,7 +51,8 @@ protected:
         Sunday
     };
     //一周的起始日
-    dayOfWeek firstDayOfWeek;
+    dayOfWeek    firstDayOfWeek;
+    TableColumn *findColumn( dayOfWeek index ) const;
 
     //上级的MainWindow指针
     MainWindow *windowPtr;

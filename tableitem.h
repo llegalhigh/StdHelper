@@ -7,12 +7,12 @@
 #include <QGraphicsItem>
 #include <QList>
 
-
 class ClassTable;
 class TableColumn;
 
 class TableItem {
     friend class ClassTable;
+    friend class Subclass;
 
 public:
     //构造函数
@@ -32,8 +32,12 @@ public:
 
     // setter
     void setText( const QString );
+    void setBorderPen( const QPen &pen );
+    void setFillBrush( const QBrush &brush );
     // getter
     QString getText() const;
+    QPen    getBorderPen() const;
+    QBrush  getFillBrush() const;
 
     //辅助函数
     template< typename T >
@@ -41,18 +45,24 @@ public:
 
 protected:
     void findParentColumns();
-
+    //上级ClassTable
     ClassTable *parentTablePtr;
 
     //显示的文字
     QString text;
-    //边框粗细
-    qreal borderWidth = 4;
+    //边框
+    qreal borderWidth = 4;                                              //粗细
+    QPen  borderPen = QPen( QBrush( Qt::white ), this->borderWidth );   //颜色
+    //底色
+    QBrush fillBrush = QBrush( QColor( 0, 0, 255, 50 ) );
 
+    //开始结束事件
     QDateTime start;
     QDateTime end;
 
-    QList< TableColumn * >        parentColumnPtrList;
+    //上级TableColumn
+    QList< TableColumn * > parentColumnPtrList;
+    //下级QGraphicsTableItem
     QList< QGraphicsTableItem * > childQGraphicsItemPtrList;
 };
 

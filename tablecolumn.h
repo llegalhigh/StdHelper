@@ -10,7 +10,6 @@
 #include <QGraphicsRectItem>
 #include <QList>
 
-
 class TableColumn : public QGraphicsRectItem {
     friend class ClassTable;
     friend class TableItem;
@@ -56,7 +55,7 @@ protected:
     //列的名称，比如“星期二”
     QString name;
     //列的编号，比如2
-    int index;
+    ClassTable::dayOfWeek index;
     //列的宽度、高度，基于ClassTable的计算
     int width, height;
     int visibleWidth;

@@ -1,11 +1,11 @@
 #include "classtable.h"
+
 #include "mainwindow.h"
 #include "tablecolumn.h"
 #include "ui_mainwindow.h"
 
 #include <QDebug>
 #include <QGraphicsBlurEffect>
-
 
 /**
  * @brief   ClassTable的构造函数
@@ -138,6 +138,14 @@ QPointF ClassTable::scaleSize( QPointF smallOld, QResizeEvent *event ) {
     QSize bigOld( event->oldSize() );
     return QPointF( smallOld.x() * bigNew.width() / bigOld.width(),
                     smallOld.y() * bigNew.height() / bigOld.height() );
+}
+
+TableColumn *ClassTable::findColumn( ClassTable::dayOfWeek index ) const {
+    for ( TableColumn *colPtr : columnList ) {
+        if ( colPtr->index == index )
+            return colPtr;
+    }
+    return nullptr;
 }
 /** scaleSize重载结束 */
 

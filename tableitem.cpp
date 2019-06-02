@@ -1,11 +1,11 @@
+#include "tableitem.h"
+
 #include "classtable.h"
 #include "tablecolumn.h"
-#include "tableitem.h"
 
 #include <QDebug>
 #include <QGraphicsScene>
 #include <QGraphicsTextItem>
-
 
 TableItem::TableItem( const QString itemText, const QDateTime st,
                       const QDateTime ed, ClassTable *parentPtr )
@@ -74,7 +74,6 @@ void TableItem::findParentColumns() {
             QDateTime endTime   = qMin( colEndTime, this->end );
 
             // 设置边框
-            QPen borderPen = QPen( QBrush( Qt::white ), this->borderWidth );
             borderPen.setJoinStyle(
                 Qt::RoundJoin );   //提示old-style cast不用管
             int xPos = colPtr->getXPos()
@@ -85,7 +84,6 @@ void TableItem::findParentColumns() {
             int rectHeight =
                 colPtr->itemYPosShouldBe( endTime ) - yPos - (int)borderWidth;
             // 设置底色
-            QBrush fillBrush = QBrush( QColor( 0, 0, 255, 50 ) );
 
             // 设置文字字体
             QFont textFont;
@@ -101,6 +99,22 @@ void TableItem::findParentColumns() {
             colPtr->childQGraphicsItemPtrList.append( childItemPtr );
         }
     }
+}
+
+QBrush TableItem::getFillBrush() const {
+    return fillBrush;
+}
+
+void TableItem::setFillBrush( const QBrush &brush ) {
+    fillBrush = brush;
+}
+
+QPen TableItem::getBorderPen() const {
+    return borderPen;
+}
+
+void TableItem::setBorderPen( const QPen &pen ) {
+    borderPen = pen;
 }
 
 /**

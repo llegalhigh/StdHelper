@@ -3,7 +3,6 @@
 
 #include <QDialog>
 
-
 namespace Ui {
 class AddClassDialog;
 }
@@ -14,6 +13,9 @@ class AddClassDialog : public QDialog {
 public:
     explicit AddClassDialog( QWidget *parent = nullptr );
     ~AddClassDialog();
+
+private slots:
+    void on_addClassButton_clicked();
 
 private:
     Ui::AddClassDialog *ui;
