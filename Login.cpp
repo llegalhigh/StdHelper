@@ -4,6 +4,8 @@
 #include <QJsonDocument>
 #include <QJsonObject>
 #include <QJsonValue>
+#include <QDebug>
+#include <QJsonArray>
 #include "link.h"
 #include "Login.h"
 #include "ui_Login.h"
@@ -146,9 +148,14 @@ void Login::showInformationL(QNetworkReply *reply)
     if(object.value("errcode").toInt() == 1)
     {
         this->close();
-        mainWindow->show();
-    }
+        int user_id = object.value("msg").toInt();
+        QJsonArray courseList = object.value("data").toArray();
 
+        mainWindow->setUser_id(QString::number(user_id));
+        mainWindow->setCourseList(courseList);
+        mainWindow->show();
+        qDebug()<<user_id<<courseList;
+    }
 }
 
 void Login::showInformationR(QNetworkReply *reply) const
