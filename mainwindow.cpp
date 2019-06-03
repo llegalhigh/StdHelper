@@ -235,9 +235,9 @@ void MainWindow::on_rightWeekButton_clicked() {
 
 void MainWindow::fetch_courseList()
 {
-    link->setUrl("http://111.230.183.100/QT/showCourse.php");   //登陆ip地址(示例)
+    link->setUrl("http://111.230.183.100/QT/showCourse.php");   //ip地址(示例)
     link->setParameter("user_id",user_id);    //设置参数
-    //link->connect(this,SLOT(showInformationL(QNetworkReply *))); //绑定槽函数(网络请求完成时触发槽函数),显示返回信息
+    link->connect(this,SLOT(setCourseList2(QNetworkReply *))); //绑定槽函数(网络请求完成时触发槽函数)
     link->post();
 }
 

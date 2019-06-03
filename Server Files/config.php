@@ -37,28 +37,46 @@ function judgeMax($content, $information, $number){
 
 function login($username, $password){
     global $con;
-    $sql = "SELECT count(`id`) as `num` FROM `userInformation` WHERE `username`=? AND `password`=?";
+    $sql = "SELECT `id` FROM `userInformation` WHERE `username`=? AND `password`=?";
 
     $stmt = $con->prepare($sql);
     if(!$stmt){
-        getResult(-1, "prepare wrong", "login");
+        getResult(-1, "prepare wrong", "login1");
     }
 
     if(!$stmt->bind_param("ss", $username, $password)){
-        getResult(-1, "bind_param wrong", "login");
+        getResult(-1, "bind_param wrong", "login1");
     }
 
     if(!$stmt->execute()){
-        getResult(-1, "execute wrong", "login");
+        getResult(-1, "execute wrong", "login1");
     }
 
     $res = $stmt->get_result();
     $row = $res->fetch_array();
-    if($row["num"] == 0){
-        getResult(-1, "username or password wrong", "login");
+    if($row["id"] == null){
+        getResult(-1, "username or password wrong", "login1");
     }
 
-    getResult(1, "Login successfully", "");
+    $sql = "SELECT * FROM `courselist` WHERE `user_id`=?";
+    $stmt = $con->prepare($sql);
+    if(!$stmt){
+        getResult(-1, "prepare wrong", "login2");
+    }
+
+    if(!$stmt->bind_param("i", $row["id"])){
+        getResult(-1, "bind_param wrong", "login2");
+    }
+
+    if(!$stmt->execute()){
+        getResult(-1, "execute wrong", "login2");
+    }
+
+    $res = $stmt->get_result();
+    while($row = $res->fetch_array()){
+        $data[] = $row;
+    }
+    getResult(1, $row["id"], $data);
 }
 
 function judgeSame($password, $checkpwd){
