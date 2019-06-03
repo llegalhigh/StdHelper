@@ -1,0 +1,317 @@
+#include "settingwindow.h"
+
+#include "timeeditdelegate.h"
+#include "ui_settingwindow.h"
+
+#include <QDebug>
+//数据存储
+#include <QVariant>
+//通知
+#include <QMessageBox>
+
+/*****************************************************************************
+ * 设置文件路径: SETTING_FILE_PATH
+ *
+ * 设置项:
+ *  index   |name & description & type
+ * ---------+---------------------------------------
+ *  0        termStartDate, 本学期从什么时候开始(QDate)
+ *  1        termTotalWeek, 本学期有多少周(quint8)
+ *  2~23
+ *第1节开始时间(2)，第2节开始时间，……，第11节开始时间(12)，第1节结束时间(13)，……(QTime)
+ *
+ * dat文件内容:
+ *  4字节魔术数字(quint32) -> 4字节版本号(qint32) -> ITEM_SIZE字节设置0
+ *  -> ITEM_SIZE字节设置1 -> ...
+ *
+ * 二进制文件读写参考：
+ * https://www.devbean.net/2013/01/qt-study-road-2-binary-file-io/
+ *****************************************************************************/
+
+static constexpr quint32 MAGIC_NUMBER    = 0xBAD00CAB;   //魔术数字
+static constexpr qint32  CURRENT_VERSION = 100;          //版本
+static constexpr qint64  OFFSET   = 8;   //魔术数字和版本号占8字节
+static constexpr qint64 ITEM_SIZE = sizeof( QVariant );   //设置占的字节数
+const QString SETTING_FILE_PATH = "setting.dat";   //设置文件存储的路径
+
+/** 窗口构造函数 */
+SettingWindow::SettingWindow( MainWindow *parentMain, QWidget *parent )
+    : QMainWindow( parent ), ui( new Ui::SettingWindow ),
+      mainWindowPtr( parentMain ) {
+    qDebug() << "Setting window opened";
+    //初始化界面
+    ui->setupUi( this );
+    ui->termStartDateEdit->setMinimumDate(
+        QDate::currentDate().addYears( -2 ) );
+    ui->termStartDateEdit->setMaximumDate(
+        QDate::currentDate().addYears( +2 ) );
+    ui->tableWidget->setItemDelegate( new TimeEditDelegate( ui->tableWidget ) );
+
+    //设置文件:setting.dat
+    QFile settingFile( SETTING_FILE_PATH );
+
+    if ( !settingFile.open(
+             QIODevice::ReadOnly ) ) {       //如果setting.dat读取失败
+        rewriteSettingFile( settingFile );   //重写文件
+        updateWindow();                      //更新窗口
+    } else {
+        QDataStream readStream( &settingFile );
+        //检查魔术数字
+        quint32 readMagicNumber;
+        readStream >> readMagicNumber;
+        qDebug() << "\treadMagicNumber: " << readMagicNumber;
+        if ( readMagicNumber != MAGIC_NUMBER ) {
+            rewriteSettingFile( settingFile );
+        } else {
+            //检查版本
+            qint32 readVersion;
+            readStream >> readVersion;
+            qDebug() << "\treadVersion: " << readVersion;
+            if ( readVersion < CURRENT_VERSION ) {
+                rewriteSettingFile( settingFile );
+
+                QMessageBox oldFileMsgBox;
+                oldFileMsgBox.setText(
+                    tr( "Existed setting file is of old version." ) );
+                oldFileMsgBox.setInformativeText(
+                    tr( "It has been replaced with a default new one." ) );
+                oldFileMsgBox.setStandardButtons( QMessageBox::Ok );
+
+                oldFileMsgBox.exec();
+            }
+            readStream.setVersion( QDataStream::Qt_5_12 );
+
+            updateWindow( readStream );
+        }
+    }
+
+    settingFile.close();
+}
+
+/** 窗口析构函数 */
+SettingWindow::~SettingWindow() {
+    delete ui;
+}
+
+/**
+ * @brief   槽，保存界面上所有设置项
+ * @warning
+ * @todo
+ */
+void SettingWindow::saveAll() {
+    QFile settingFile( SETTING_FILE_PATH );
+    settingFile.open( QIODevice::ReadWrite );
+
+    QDataStream writeStream( &settingFile );
+
+    writeSettingItem( 0, QVariant( this->ui->termStartDateEdit->date() ),
+                      writeStream );
+    writeSettingItem( 1, QVariant( this->ui->totalWeekBox->value() ),
+                      writeStream );
+    for ( int row = 0; row < 11; ++row ) {
+        writeSettingItem( row + 2,
+                          QVariant( this->ui->tableWidget->item( row, 0 )
+                                        ->data( Qt::UserRole )
+                                        .toTime() ),
+                          writeStream );   //开始时间
+        writeSettingItem( row + 13,
+                          QVariant( this->ui->tableWidget->item( row, 1 )
+                                        ->data( Qt::UserRole )
+                                        .toTime() ),
+                          writeStream );   //结束时间
+    }
+}
+
+/**
+ * @brief   完全重写dat，恢复默认值
+ * @warning
+ * @todo    上传数据库版本
+ */
+void SettingWindow::rewriteSettingFile( QFile &f ) {
+    qDebug() << "Start rewriting";
+    QIODevice::OpenMode originalMode = f.openMode();
+    f.close();
+    f.open( QIODevice::WriteOnly );
+    QDataStream rewriteStream( &f );
+    rewriteStream.device()->seek( 0 );
+    rewriteStream << MAGIC_NUMBER;      //魔术数字
+    rewriteStream << CURRENT_VERSION;   //版本
+    // qDebug() << rewriteStream.device()->pos();
+    writeSettingItem( 0, QVariant( QDate( 2019, 2, 25 ) ), rewriteStream );
+    writeSettingItem( 1, QVariant( static_cast< quint8 >( 20 ) ),
+                      rewriteStream );
+    //课程开始时间
+    writeSettingItem( 2, QVariant( QTime( 8, 50 ) ), rewriteStream );
+    writeSettingItem( 3, QVariant( QTime( 9, 40 ) ), rewriteStream );
+    writeSettingItem( 4, QVariant( QTime( 10, 40 ) ), rewriteStream );
+    writeSettingItem( 5, QVariant( QTime( 11, 30 ) ), rewriteStream );
+    writeSettingItem( 6, QVariant( QTime( 14, 0 ) ), rewriteStream );
+    writeSettingItem( 7, QVariant( QTime( 14, 50 ) ), rewriteStream );
+    writeSettingItem( 8, QVariant( QTime( 15, 45 ) ), rewriteStream );
+    writeSettingItem( 9, QVariant( QTime( 16, 35 ) ), rewriteStream );
+    writeSettingItem( 10, QVariant( QTime( 19, 0 ) ), rewriteStream );
+    writeSettingItem( 11, QVariant( QTime( 19, 55 ) ), rewriteStream );
+    writeSettingItem( 12, QVariant( QTime( 20, 50 ) ), rewriteStream );
+    //课程结束时间
+    writeSettingItem( 13, QVariant( QTime( 9, 35 ) ), rewriteStream );
+    writeSettingItem( 14, QVariant( QTime( 10, 25 ) ), rewriteStream );
+    writeSettingItem( 15, QVariant( QTime( 11, 25 ) ), rewriteStream );
+    writeSettingItem( 16, QVariant( QTime( 12, 15 ) ), rewriteStream );
+    writeSettingItem( 17, QVariant( QTime( 14, 45 ) ), rewriteStream );
+    writeSettingItem( 18, QVariant( QTime( 15, 35 ) ), rewriteStream );
+    writeSettingItem( 19, QVariant( QTime( 16, 30 ) ), rewriteStream );
+    writeSettingItem( 20, QVariant( QTime( 17, 20 ) ), rewriteStream );
+    writeSettingItem( 21, QVariant( QTime( 19, 45 ) ), rewriteStream );
+    writeSettingItem( 22, QVariant( QTime( 20, 40 ) ), rewriteStream );
+    writeSettingItem( 23, QVariant( QTime( 21, 35 ) ), rewriteStream );
+
+    f.close();
+    f.open( originalMode );
+    qDebug() << "End rewriting";
+}
+
+/**
+ * @brief   通过stream将第index项设置写入dat
+ * @warning stream需要write权限
+ * @todo    1. 要想一个方法，既不限制字节，又好定位；
+ *          2. 要加入上传数据库
+ */
+void SettingWindow::writeSettingItem( const qint64 index, QVariant content,
+                                      QDataStream &stream ) {
+    stream.device()->seek( index * ITEM_SIZE + OFFSET );
+    stream << content;
+    //上面这样能正确保存，但不能限制字节
+    // stream.device()->write(content.toByteArray().left(ITEM_SIZE));
+    //上面这样能限制字节，但不能正确保存
+}
+
+/**
+ * @brief   通过stream从dat中读取第index项设置
+ * @warning stream需要read权限
+ * @todo    需要数据库读取版本
+ */
+QVariant SettingWindow::readSettingItem( const qint64 index,
+                                         QDataStream &stream ) {
+    stream.device()->seek( index * ITEM_SIZE + OFFSET );
+    // QByteArray itemData = stream.device()->read(ITEM_SIZE);
+    // QDataStream converter(&itemData, QIODevice::ReadWrite);
+    // QVariant readItem = QVariant(converter);
+    //上面这样建立在限制字节的基础上
+    return QVariant( stream );
+}
+
+/**
+ * @brief
+ * 通过stream读取第index项设置，并通过mainPtr将其传递到MainWindow::ClassTable中
+ * @note    static
+ * @return  第index项设置对应的QVariant
+ * @warning 前提是已经确保setting.dat合法，且stream有read权限
+ */
+QVariant SettingWindow::passOne( const qint64 index, QDataStream &stream,
+                                 MainWindow *mainPtr ) {
+    ClassTable *tablePtr = mainPtr->childTablePtr;
+    switch ( index ) {
+        case 0: {   // switch-case只有在大括号内能创建对象
+            QDate termStartDate     = readSettingItem( 0, stream ).toDate();
+            tablePtr->termStartDate = termStartDate;
+            return termStartDate;
+        }
+        case 1: {
+            quint8 termTotalWeek =
+                readSettingItem( 1, stream ).value< quint8 >();
+            tablePtr->termTotalWeek = termTotalWeek;
+            return termTotalWeek;
+        }
+        default: {
+            if ( 2 <= index && index <= 23 ) {
+                QTime sectionTime = readSettingItem( index, stream ).toTime();
+                int   isEnd       = ( static_cast< int >( index ) - 2 ) / 11;
+                auto &sectionPair =
+                    tablePtr->sectionTime[static_cast< int >( index )
+                                          - isEnd * 11 - 2];
+                ( isEnd ? sectionPair.second : sectionPair.first ) =
+                    sectionTime;
+                return sectionTime;
+            }
+            return QVariant();
+        }
+    }
+}
+
+/**
+ * @brief
+ * 通过stream读取第index项设置以更新SettingWindow，并传递到MainWindow::ClassTable中
+ * @warning 前提是已经确保setting.dat合法，且stream有read权限
+ */
+void SettingWindow::updateOne( const qint64 index, QDataStream &stream ) {
+    QVariant getSettingItem = passOne( index, stream, mainWindowPtr );
+    switch ( index ) {
+        case 0: {
+            this->ui->termStartDateEdit->setDate( getSettingItem.toDate() );
+            break;
+        }
+        case 1: {
+            this->ui->totalWeekBox->setValue(
+                getSettingItem.value< quint8 >() );
+            break;
+        }
+        default: {
+            if ( 2 <= index && index <= 23 ) {
+                int   isEnd    = ( static_cast< int >( index ) - 2 ) / 11;
+                QTime itemTime = getSettingItem.toTime();
+                qDebug() << itemTime.toString( "h:mm" );
+                QTableWidgetItem *item =
+                    new QTableWidgetItem( itemTime.toString( "h:mm" ) );
+                item->setData( Qt::UserRole, itemTime );
+                this->ui->tableWidget->setItem(
+                    static_cast< int >( index ) - isEnd * 11 - 2, isEnd, item );
+                break;
+            }
+        }
+    }
+}
+
+/**
+ * @brief   通过stream读取dat以更新设置窗口，并传递至MainWindow::ClassTable
+ * @warning 前提是已经确保setting.dat合法，且stream有read权限
+ * @todo    无？
+ */
+void SettingWindow::updateWindow( QDataStream &stream ) {
+    for ( qint64 index = 0; index <= MAX_SETTING_INDEX; ++index ) {
+        updateOne( index, stream );
+    }
+}
+/** @overload 用内部的stream */
+void SettingWindow::updateWindow() {
+    QFile settingFile( SETTING_FILE_PATH );
+    settingFile.open( QIODevice::ReadOnly | QIODevice::ExistingOnly );
+    QDataStream readStream( &settingFile );
+    updateWindow( readStream );
+}
+
+void SettingWindow::passAll( MainWindow *mainPtr ) {
+    QFile settingFile( SETTING_FILE_PATH );
+
+    if ( !settingFile.open(
+             QIODevice::ReadOnly ) ) {       //如果setting.dat读取失败
+        rewriteSettingFile( settingFile );   //重写文件
+    }
+
+    QDataStream readStream( &settingFile );
+    for ( qint64 index = 0; index <= MAX_SETTING_INDEX; ++index ) {
+        passOne( index, readStream, mainPtr );
+    }
+}
+
+void SettingWindow::on_applyButton_clicked() {
+    saveAll();
+}
+
+void SettingWindow::on_cancelButton_clicked() {
+    this->close();
+}
+
+void SettingWindow::on_okButton_clicked() {
+    saveAll();
+    this->close();
+}
